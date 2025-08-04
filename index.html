@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird - Vivantis Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="menu" class="screen active">
+            <h1>Flappy Bird</h1>
+            <h2>Vivantis Edition</h2>
+            <button id="start-btn" class="btn">Začít hru</button>
+            <button id="leaderboard-btn" class="btn">Žebříček</button>
+            <button id="about-btn" class="btn">O hře</button>
+        </div>
+
+        <div id="game-screen" class="screen">
+            <div id="game-info">
+                <span id="score">0</span>
+                <span id="level">Úroveň 1</span>
+            </div>
+            <canvas id="game-canvas"></canvas>
+            <div id="game-over" class="hidden">
+                <h2>Konec hry!</h2>
+                <p>Skóre: <span id="final-score">0</span></p>
+                <button id="restart-btn" class="btn">Hrát znovu</button>
+                <button id="menu-btn" class="btn">Hlavní menu</button>
+            </div>
+        </div>
+
+        <div id="leaderboard-screen" class="screen">
+            <h2>Žebříček</h2>
+            <div id="leaderboard-list"></div>
+            <button id="back-btn" class="btn">Zpět</button>
+        </div>
+
+        <div id="about-screen" class="screen">
+            <h2>O hře</h2>
+            <p>Flappy Bird - Vivantis Edition je hra vytvořená pro zaměstnance Vivantisu.</p>
+            <p>Proletějte historií firmy a soutěžte s kolegy!</p>
+            <button id="about-back-btn" class="btn">Zpět</button>
+        </div>
+    </div>
+
+    <audio id="background-music" loop>
+        <source src="hudba/Pisen smutnych holek.m4a" type="audio/mp4">
+    </audio>
+    <audio id="jump-sound">
+        <source src="hudba/wee.mp3" type="audio/mpeg">
+    </audio>
+    <script src="game.js"></script>
+</body>
+</html> 
