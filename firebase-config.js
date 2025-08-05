@@ -1,12 +1,11 @@
 // Firebase konfigurace
-// Nahraďte tyto hodnoty skutečnými údaji z vašeho Firebase projektu
 const firebaseConfig = {
-    apiKey: "your-api-key-here",
-    authDomain: "your-project-id.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project-id.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "your-app-id-here"
+    apiKey: "AIzaSyB0DG5wwG9bFz1kObQY1hjAYuROAFccAq8",
+    authDomain: "flappy-bird---viva.firebaseapp.com",
+    projectId: "flappy-bird---viva",
+    storageBucket: "flappy-bird---viva.firebasestorage.app",
+    messagingSenderId: "143121183377",
+    appId: "1:143121183377:web:ba6cf81e210294f20a8530"
 };
 
 // Inicializace Firebase
