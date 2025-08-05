@@ -23,7 +23,6 @@ class FlappyBirdGame {
         this.bonuses = [];
         this.bonusImages = [];
         this.bonusImageNames = ['ring.png', 'ceresne.png', 'lipstick.png', 'flash.png'];
-        this.bonusScore = 0;
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
         
@@ -131,7 +130,6 @@ class FlappyBirdGame {
         this.bird.velocity = 0;
         this.pipes = [];
         this.bonuses = [];
-        this.bonusScore = 0;
         this.extraLives = 0;
         this.pipeCount = 0;
         this.lastPipeTime = 0;
@@ -248,9 +246,10 @@ class FlappyBirdGame {
                 if (bonus.type === 3) { // flash
                     this.extraLives++;
                 } else { // ring, ceresne, lipstick
-                    this.bonusScore += 5;
+                    this.score += 5; // Přidá 5 bodů přímo k hlavnímu skóre
                 }
                 this.bonuses.splice(i, 1);
+                this.updateScore(); // Aktualizuje zobrazení skóre
             }
         }
     }
@@ -300,12 +299,9 @@ class FlappyBirdGame {
     updateScore() {
         document.getElementById('score').textContent = this.score;
         
-        // Zobrazení bonusového skóre a životů
-        if (this.bonusScore > 0 || this.extraLives > 0) {
-            let bonusText = '';
-            if (this.bonusScore > 0) bonusText += `Bonus: ${this.bonusScore} `;
-            if (this.extraLives > 0) bonusText += `Životy: ${this.extraLives}`;
-            document.getElementById('level').textContent = bonusText;
+        // Zobrazení bonusových životů nebo úrovně
+        if (this.extraLives > 0) {
+            document.getElementById('level').textContent = `Životy: ${this.extraLives}`;
         } else {
             // Aktualizace úrovně podle pozadí
             let level = 1;
