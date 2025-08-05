@@ -20,7 +20,7 @@ class FlappyBirdGame {
         this.pipeInterval = 2500; // Zvětšil jsem interval mezi trubkami (ms)
         
         this.birdImage = new Image();
-        this.birdImage.src = 'ptacek/Ptacek MR.png';
+        this.birdImage.src = 'ptacek/plamenak.png';
         this.birdImage.onload = () => {
             console.log('Obrázek ptáčka načten');
         };
