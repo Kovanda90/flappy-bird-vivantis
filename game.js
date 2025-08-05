@@ -68,6 +68,10 @@ class FlappyBirdGame {
         // Zvuk skoku
         this.jumpSound = document.getElementById('jump-sound');
         this.jumpSound.volume = 0.5; // Nastavím hlasitost zvuku skoku
+        
+        // Zvuk nastavení
+        this.soundEnabled = true;
+        this.soundToggleBtn = document.getElementById('sound-toggle-btn');
     }
 
     setupCanvas() {
@@ -86,6 +90,9 @@ class FlappyBirdGame {
         document.getElementById('menu-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('back-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('about-back-btn').addEventListener('click', () => this.showScreen('menu'));
+        
+        // Sound toggle
+        this.soundToggleBtn.addEventListener('click', () => this.toggleSound());
         
         // Touch and keyboard controls
         this.canvas.addEventListener('click', () => this.jump());
@@ -520,12 +527,26 @@ class FlappyBirdGame {
     }
     
     playJumpSound() {
-        if (this.jumpSound) {
+        if (this.jumpSound && this.soundEnabled) {
             // Resetuje zvuk na začátek a přehraje
             this.jumpSound.currentTime = 0;
             this.jumpSound.play().catch(e => {
                 console.log('Zvuk skoku se nespustil:', e);
             });
+        }
+    }
+    
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        
+        if (this.soundEnabled) {
+            this.soundToggleBtn.textContent = '🔊';
+            this.soundToggleBtn.classList.remove('muted');
+            this.backgroundMusic.volume = this.musicVolume;
+        } else {
+            this.soundToggleBtn.textContent = '🔇';
+            this.soundToggleBtn.classList.add('muted');
+            this.backgroundMusic.volume = 0;
         }
     }
 }
