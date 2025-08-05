@@ -27,7 +27,7 @@ class FlappyBirdGame {
         
         // Načtení obrázků oblohy
         this.skyImages = [];
-        this.skyImageNames = ['obloha.png', 'obloha1.png', 'obloha2.png'];
+        this.skyImageNames = ['obloha.jpg', 'mrak1.png', 'mrak2.png', 'mrak3.png'];
         
         this.skyImageNames.forEach((imageName, index) => {
             const img = new Image();
@@ -241,18 +241,10 @@ class FlappyBirdGame {
     }
 
     drawBackground() {
-        // Výběr obrázku oblohy podle skóre
-        let skyImageIndex = 0;
-        if (this.score >= 10) skyImageIndex = 1;
-        if (this.score >= 20) skyImageIndex = 2;
-        
-        // Omezení na dostupné obrázky
-        skyImageIndex = Math.min(skyImageIndex, this.skyImages.length - 1);
-        
-        // Vykreslení obrázku oblohy
-        if (this.skyImages[skyImageIndex] && this.skyImages[skyImageIndex].complete) {
+        // Vykreslení hlavního obrázku oblohy (obloha.jpg)
+        if (this.skyImages[0] && this.skyImages[0].complete) {
             this.ctx.drawImage(
-                this.skyImages[skyImageIndex],
+                this.skyImages[0],
                 0, 0, this.canvas.width, this.canvas.height
             );
         } else {
@@ -265,26 +257,35 @@ class FlappyBirdGame {
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
         
-        // Draw clouds (volitelně - můžete odstranit, pokud chcete jen obrázky)
+        // Vykreslení mraků podle skóre
         this.drawClouds();
     }
 
     drawClouds() {
-        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        for (let i = 0; i < 3; i++) {
-            const x = (Date.now() * 0.01 + i * 200) % (this.canvas.width + 100) - 50;
-            const y = 50 + i * 30;
-            this.drawCloud(x, y, 30 + i * 10);
+        // Výběr obrázku mraku podle skóre
+        let cloudImageIndex = 1; // Začínáme s mrak1.png
+        if (this.score >= 10) cloudImageIndex = 2; // mrak2.png
+        if (this.score >= 20) cloudImageIndex = 3; // mrak3.png
+        
+        // Omezení na dostupné obrázky mraků
+        cloudImageIndex = Math.min(cloudImageIndex, this.skyImages.length - 1);
+        
+        // Vykreslení mraků pomocí obrázků
+        for (let i = 0; i < 2; i++) {
+            const x = (Date.now() * 0.005 + i * 300) % (this.canvas.width + 150) - 75;
+            const y = 30 + i * 40;
+            const size = 80 + i * 20;
+            
+            if (this.skyImages[cloudImageIndex] && this.skyImages[cloudImageIndex].complete) {
+                this.ctx.drawImage(
+                    this.skyImages[cloudImageIndex],
+                    x, y, size, size * 0.6
+                );
+            }
         }
     }
 
-    drawCloud(x, y, size) {
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, size, 0, Math.PI * 2);
-        this.ctx.arc(x + size * 0.5, y, size * 0.7, 0, Math.PI * 2);
-        this.ctx.arc(x + size, y, size * 0.8, 0, Math.PI * 2);
-        this.ctx.fill();
-    }
+
 
     drawPipes() {
         this.ctx.fillStyle = '#FF4D79';
