@@ -19,6 +19,14 @@ class FlappyBirdGame {
         this.lastPipeTime = 0;
         this.pipeInterval = 2500; // Zvětšil jsem interval mezi trubkami (ms)
         
+        // Bonusové předměty
+        this.bonuses = [];
+        this.bonusImages = [];
+        this.bonusImageNames = ['ring.png', 'ceresne.png', 'lipstick.png', 'flash.png'];
+        this.bonusScore = 0;
+        this.extraLives = 0;
+        this.pipeCount = 0; // Počítadlo průletů mezi tubusy
+        
         this.birdImage = new Image();
         this.birdImage.src = 'ptacek/plamenak.png';
         this.birdImage.onload = () => {
@@ -36,6 +44,16 @@ class FlappyBirdGame {
                 console.log(`Obrázek oblohy ${index + 1} načten`);
             };
             this.skyImages.push(img);
+        });
+        
+        // Načtení bonusových obrázků
+        this.bonusImageNames.forEach((imageName, index) => {
+            const img = new Image();
+            img.src = `bonusy/${imageName}`;
+            img.onload = () => {
+                console.log(`Bonusový obrázek ${imageName} načten`);
+            };
+            this.bonusImages.push(img);
         });
         
         this.setupCanvas();
@@ -109,6 +127,10 @@ class FlappyBirdGame {
         this.bird.y = 200;
         this.bird.velocity = 0;
         this.pipes = [];
+        this.bonuses = [];
+        this.bonusScore = 0;
+        this.extraLives = 0;
+        this.pipeCount = 0;
         this.lastPipeTime = 0;
         this.updateScore();
         document.getElementById('game-over').classList.add('hidden');
@@ -155,6 +177,28 @@ class FlappyBirdGame {
                 gapY: gapY,
                 passed: false
             });
+            
+            // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick)
+            if (this.pipeCount % 5 === 0 && this.pipeCount > 0) {
+                const bonusType = Math.floor(Math.random() * 3); // 0-2 pro ring, ceresne, lipstick
+                this.bonuses.push({
+                    x: this.canvas.width + 100,
+                    y: gapY + this.pipeGap / 2 - 25,
+                    type: bonusType,
+                    collected: false
+                });
+            }
+            
+            // Přidání flash bonusu každých 10 průletů
+            if (this.pipeCount % 10 === 0 && this.pipeCount > 0) {
+                this.bonuses.push({
+                    x: this.canvas.width + 100,
+                    y: gapY + this.pipeGap / 2 - 25,
+                    type: 3, // flash
+                    collected: false
+                });
+            }
+            
             this.lastPipeTime = currentTime;
         }
         
@@ -179,7 +223,31 @@ class FlappyBirdGame {
             if (!pipe.passed && pipe.x + this.pipeWidth < this.bird.x) {
                 pipe.passed = true;
                 this.score++;
+                this.pipeCount++;
                 this.updateScore();
+            }
+        }
+        
+        // Update bonuses
+        for (let i = this.bonuses.length - 1; i >= 0; i--) {
+            const bonus = this.bonuses[i];
+            bonus.x -= this.pipeSpeed;
+            
+            // Remove bonuses that are off screen
+            if (bonus.x + 50 < 0) {
+                this.bonuses.splice(i, 1);
+                continue;
+            }
+            
+            // Check collision with bonus
+            if (!bonus.collected && this.checkBonusCollision(bonus)) {
+                bonus.collected = true;
+                if (bonus.type === 3) { // flash
+                    this.extraLives++;
+                } else { // ring, ceresne, lipstick
+                    this.bonusScore += 5;
+                }
+                this.bonuses.splice(i, 1);
             }
         }
     }
@@ -205,19 +273,53 @@ class FlappyBirdGame {
         
         return false;
     }
+    
+    checkBonusCollision(bonus) {
+        const birdRight = this.bird.x + this.bird.size;
+        const birdLeft = this.bird.x;
+        const birdTop = this.bird.y;
+        const birdBottom = this.bird.y + this.bird.size;
+        
+        const bonusRight = bonus.x + 50;
+        const bonusLeft = bonus.x;
+        const bonusTop = bonus.y;
+        const bonusBottom = bonus.y + 50;
+        
+        // Check if bird collides with bonus
+        if (birdRight > bonusLeft && birdLeft < bonusRight && 
+            birdBottom > bonusTop && birdTop < bonusBottom) {
+            return true;
+        }
+        
+        return false;
+    }
 
     updateScore() {
         document.getElementById('score').textContent = this.score;
         
-        // Aktualizace úrovně podle pozadí
-        let level = 1;
-        if (this.score >= 10) level = 2;
-        if (this.score >= 20) level = 3;
-        
-        document.getElementById('level').textContent = `Úroveň ${level}`;
+        // Zobrazení bonusového skóre a životů
+        if (this.bonusScore > 0 || this.extraLives > 0) {
+            let bonusText = '';
+            if (this.bonusScore > 0) bonusText += `Bonus: ${this.bonusScore} `;
+            if (this.extraLives > 0) bonusText += `Životy: ${this.extraLives}`;
+            document.getElementById('level').textContent = bonusText;
+        } else {
+            // Aktualizace úrovně podle pozadí
+            let level = 1;
+            if (this.score >= 10) level = 2;
+            if (this.score >= 20) level = 3;
+            document.getElementById('level').textContent = `Úroveň ${level}`;
+        }
     }
 
     gameOver() {
+        // Kontrola bonusových životů
+        if (this.extraLives > 0) {
+            this.extraLives--;
+            this.updateScore();
+            return; // Pokračuj ve hře
+        }
+        
         this.gameRunning = false;
         document.getElementById('final-score').textContent = this.score;
         document.getElementById('game-over').classList.remove('hidden');
@@ -235,6 +337,9 @@ class FlappyBirdGame {
         
         // Draw pipes
         this.drawPipes();
+        
+        // Draw bonuses
+        this.drawBonuses();
         
         // Draw bird
         this.drawBird();
@@ -321,6 +426,23 @@ class FlappyBirdGame {
             this.ctx.arc(this.bird.x + this.bird.size/2, this.bird.y + this.bird.size/2, this.bird.size/2, 0, Math.PI * 2);
             this.ctx.fill();
         }
+    }
+    
+    drawBonuses() {
+        this.bonuses.forEach(bonus => {
+            if (this.bonusImages[bonus.type] && this.bonusImages[bonus.type].complete) {
+                this.ctx.drawImage(
+                    this.bonusImages[bonus.type],
+                    bonus.x, bonus.y, 50, 50
+                );
+            } else {
+                // Fallback - nakreslíme barevný kruh
+                this.ctx.fillStyle = bonus.type === 3 ? '#FFD700' : '#FF69B4';
+                this.ctx.beginPath();
+                this.ctx.arc(bonus.x + 25, bonus.y + 25, 25, 0, Math.PI * 2);
+                this.ctx.fill();
+            }
+        });
     }
 
     gameLoop() {
