@@ -179,8 +179,8 @@ class FlappyBirdGame {
                 passed: false
             });
             
-            // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick)
-            if (this.pipeCount % 5 === 0 && this.pipeCount > 0) {
+            // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick) - ale ne když je flash
+            if (this.pipeCount % 5 === 0 && this.pipeCount > 0 && this.pipeCount % 10 !== 0) {
                 const bonusType = Math.floor(Math.random() * 3); // 0-2 pro ring, ceresne, lipstick
                 this.bonuses.push({
                     x: this.canvas.width + 100,
@@ -190,7 +190,7 @@ class FlappyBirdGame {
                 });
             }
             
-            // Přidání flash bonusu každých 10 průletů
+            // Přidání flash bonusu každých 10 průletů (samostatně)
             if (this.pipeCount % 10 === 0 && this.pipeCount > 0) {
                 this.bonuses.push({
                     x: this.canvas.width + 100,
@@ -216,8 +216,15 @@ class FlappyBirdGame {
             
             // Check collision
             if (this.checkCollision(pipe)) {
-                this.gameOver();
-                return;
+                // Pokud má hráč extra život, spotřebuje ho a pokračuje
+                if (this.extraLives > 0) {
+                    this.extraLives--;
+                    this.updateScore();
+                    // Pták proletí tubusem - pokračuje ve hře
+                } else {
+                    this.gameOver();
+                    return;
+                }
             }
             
             // Check if bird passed the pipe
@@ -312,13 +319,6 @@ class FlappyBirdGame {
     }
 
     gameOver() {
-        // Kontrola bonusových životů
-        if (this.extraLives > 0) {
-            this.extraLives--;
-            this.updateScore();
-            return; // Pokračuj ve hře
-        }
-        
         this.gameRunning = false;
         document.getElementById('final-score').textContent = this.score;
         document.getElementById('game-over').classList.remove('hidden');
