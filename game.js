@@ -540,11 +540,11 @@ class FlappyBirdGame {
         this.soundEnabled = !this.soundEnabled;
         
         if (this.soundEnabled) {
-            this.soundToggleBtn.textContent = '🔊';
+            this.soundToggleBtn.textContent = '🔊 Zvuk';
             this.soundToggleBtn.classList.remove('muted');
             this.backgroundMusic.volume = this.musicVolume;
         } else {
-            this.soundToggleBtn.textContent = '🔇';
+            this.soundToggleBtn.textContent = '🔇 Zvuk';
             this.soundToggleBtn.classList.add('muted');
             this.backgroundMusic.volume = 0;
         }
