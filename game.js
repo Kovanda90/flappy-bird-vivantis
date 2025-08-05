@@ -28,7 +28,8 @@ class FlappyBirdGame {
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
         
         this.birdImage = new Image();
-        this.birdImage.src = 'ptacek/plamenak.png';
+        this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'plamenak.png'; // Načte uložený avatar nebo výchozí
+        this.birdImage.src = `ptacek/${this.selectedAvatar}`;
         this.birdImage.onload = () => {
             console.log('Obrázek ptáčka načten');
         };
@@ -74,6 +75,7 @@ class FlappyBirdGame {
     setupEventListeners() {
         // Menu navigation
         document.getElementById('start-btn').addEventListener('click', () => this.startGame());
+        document.getElementById('avatar-btn').addEventListener('click', () => this.showScreen('avatar-screen'));
         document.getElementById('leaderboard-btn').addEventListener('click', () => this.showScreen('leaderboard-screen'));
         document.getElementById('about-btn').addEventListener('click', () => this.showScreen('about-screen'));
         
@@ -82,6 +84,7 @@ class FlappyBirdGame {
         document.getElementById('menu-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('back-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('about-back-btn').addEventListener('click', () => this.showScreen('menu'));
+        document.getElementById('avatar-back-btn').addEventListener('click', () => this.showScreen('menu'));
         
         // Touch and keyboard controls
         this.canvas.addEventListener('click', () => this.jump());
@@ -105,6 +108,10 @@ class FlappyBirdGame {
         
         if (screenId === 'leaderboard-screen') {
             this.updateLeaderboard();
+        }
+        
+        if (screenId === 'avatar-screen') {
+            this.setupAvatarSelection();
         }
     }
 
@@ -513,6 +520,43 @@ class FlappyBirdGame {
             this.musicVolume = volume;
             this.backgroundMusic.volume = volume;
         }
+    }
+    
+    setupAvatarSelection() {
+        // Označí aktuálně vybraný avatar
+        document.querySelectorAll('.avatar-item').forEach(item => {
+            item.classList.remove('selected');
+            if (item.dataset.avatar === this.selectedAvatar) {
+                item.classList.add('selected');
+            }
+        });
+        
+        // Přidá event listenery pro výběr avataru
+        document.querySelectorAll('.avatar-item').forEach(item => {
+            item.addEventListener('click', () => this.selectAvatar(item.dataset.avatar));
+        });
+    }
+    
+    selectAvatar(avatarName) {
+        this.selectedAvatar = avatarName;
+        
+        // Aktualizuje vizuální výběr
+        document.querySelectorAll('.avatar-item').forEach(item => {
+            item.classList.remove('selected');
+            if (item.dataset.avatar === avatarName) {
+                item.classList.add('selected');
+            }
+        });
+        
+        // Načte nový obrázek ptáčka
+        this.birdImage = new Image();
+        this.birdImage.src = `ptacek/${avatarName}`;
+        this.birdImage.onload = () => {
+            console.log(`Avatar ${avatarName} načten`);
+        };
+        
+        // Uloží výběr do localStorage
+        localStorage.setItem('selectedAvatar', avatarName);
     }
     
 
