@@ -176,7 +176,8 @@ class FlappyBirdGame {
             this.pipes.push({
                 x: this.canvas.width,
                 gapY: gapY,
-                passed: false
+                passed: false,
+                collisionHandled: false
             });
             
             // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick) - ale ne když je flash
@@ -214,13 +215,15 @@ class FlappyBirdGame {
                 continue;
             }
             
-            // Check collision
-            if (this.checkCollision(pipe)) {
+            // Check collision (pouze pokud ještě nebyla zpracována)
+            if (!pipe.collisionHandled && this.checkCollision(pipe)) {
                 // Pokud má hráč extra život, spotřebuje ho a pokračuje
                 if (this.extraLives > 0) {
                     this.extraLives--;
                     this.updateScore();
                     // Pták proletí tubusem - pokračuje ve hře
+                    // Označíme tubus jako již zpracovaný, aby se život nespotřeboval znovu
+                    pipe.collisionHandled = true;
                 } else {
                     this.gameOver();
                     return;
