@@ -457,12 +457,36 @@ class FlappyBirdGame {
         requestAnimationFrame(() => this.gameLoop());
     }
 
-    // Leaderboard functionality
-    loadLeaderboard() {
-        this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+    // Firebase Leaderboard functionality
+    async loadLeaderboard() {
+        try {
+            if (window.db) {
+                const snapshot = await window.db.collection('scores')
+                    .orderBy('score', 'desc')
+                    .limit(10)
+                    .get();
+                
+                this.leaderboard = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    this.leaderboard.push({
+                        name: data.playerName,
+                        score: data.score,
+                        date: data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString('cs-CZ') : 'Dnes'
+                    });
+                });
+            } else {
+                console.log('Firebase není dostupné, používá se lokální žebříček');
+                this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+            }
+        } catch (error) {
+            console.error('Chyba při načítání žebříčku:', error);
+            // Fallback na lokální žebříček
+            this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+        }
     }
 
-    saveScore() {
+    async saveScore() {
         const playerName = prompt('Zadejte své jméno:') || 'Anonym';
         const newScore = {
             name: playerName,
@@ -470,14 +494,31 @@ class FlappyBirdGame {
             date: new Date().toLocaleDateString('cs-CZ')
         };
         
+        // Uložení do Firebase
+        try {
+            if (window.db) {
+                await window.db.collection('scores').add({
+                    playerName: playerName,
+                    score: this.score,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('Skóre uloženo do Firebase');
+            }
+        } catch (error) {
+            console.error('Chyba při ukládání do Firebase:', error);
+        }
+        
+        // Fallback na lokální úložiště
         this.leaderboard.push(newScore);
         this.leaderboard.sort((a, b) => b.score - a.score);
-        this.leaderboard = this.leaderboard.slice(0, 10); // Keep only top 10
-        
+        this.leaderboard = this.leaderboard.slice(0, 10);
         localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
     }
 
-    updateLeaderboard() {
+    async updateLeaderboard() {
+        // Načte aktuální žebříček z Firebase
+        await this.loadLeaderboard();
+        
         const leaderboardList = document.getElementById('leaderboard-list');
         leaderboardList.innerHTML = '';
         
