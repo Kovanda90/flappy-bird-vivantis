@@ -142,11 +142,18 @@ body {
     display: none !important;
 }
 
+#leaderboard-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 #leaderboard-screen h2,
 #about-screen h2 {
     color: #333;
     margin-bottom: 30px;
     font-size: 2rem;
+    flex-shrink: 0; /* Zabrání zmenšení nadpisu */
 }
 
 #leaderboard-list {
@@ -154,6 +161,12 @@ body {
     width: 100%;
     overflow-y: auto;
     margin-bottom: 20px;
+    max-height: calc(100vh - 200px); /* Omezí výšku na mobilních zařízeních */
+}
+
+#leaderboard-screen .btn {
+    flex-shrink: 0; /* Zabrání zmenšení tlačítka */
+    margin-top: auto; /* Posune tlačítko dolů */
 }
 
 .leaderboard-item {
@@ -257,6 +270,38 @@ body {
     .btn {
         min-width: 180px;
         padding: 12px 25px;
+    }
+    
+    /* Oprava pro žebříček na mobilních zařízeních */
+    #leaderboard-screen {
+        padding: 15px;
+    }
+    
+    #leaderboard-screen h2 {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    
+    #leaderboard-list {
+        max-height: calc(100vh - 250px);
+        margin-bottom: 15px;
+    }
+    
+    .leaderboard-item {
+        padding: 12px;
+        margin: 8px 0;
+    }
+    
+    .leaderboard-item .rank {
+        font-size: 1rem;
+    }
+    
+    .leaderboard-item .name {
+        font-size: 0.9rem;
+    }
+    
+    .leaderboard-item .score {
+        font-size: 1rem;
     }
 }
 
