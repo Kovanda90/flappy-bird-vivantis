@@ -22,12 +22,12 @@ class FlappyBirdGame {
         // Bonusové předměty
         this.bonuses = [];
         this.bonusImages = [];
-        this.bonusImageNames = ['ring.png', 'ceresne.png', 'lipstick.png', 'flash.png'];
+        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png'];
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
         
         this.birdImage = new Image();
-        this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'plamenak.png'; // Načte uložený avatar nebo výchozí
+        this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'unicorn.png'; // Načte uložený avatar nebo výchozí
         this.birdImage.src = `ptacek/${this.selectedAvatar}`;
         this.birdImage.onload = () => {
             console.log('Obrázek ptáčka načten');
@@ -348,12 +348,23 @@ class FlappyBirdGame {
     }
 
     drawBackground() {
-        // Vykreslení hlavního obrázku oblohy (obloha.jpg)
+        // Vykreslení hlavního obrázku oblohy (obloha.jpg) s zachováním poměru stran
         if (this.skyImages[0] && this.skyImages[0].complete) {
-            this.ctx.drawImage(
-                this.skyImages[0],
-                0, 0, this.canvas.width, this.canvas.height
-            );
+            const img = this.skyImages[0];
+            const imgAspect = img.width / img.height;
+            const canvasAspect = this.canvas.width / this.canvas.height;
+            
+            if (imgAspect > canvasAspect) {
+                // Obrázek je širší - použijeme výšku canvasu
+                const newWidth = this.canvas.height * imgAspect;
+                const x = (this.canvas.width - newWidth) / 2;
+                this.ctx.drawImage(img, x, 0, newWidth, this.canvas.height);
+            } else {
+                // Obrázek je vyšší - použijeme šířku canvasu
+                const newHeight = this.canvas.width / imgAspect;
+                const y = (this.canvas.height - newHeight) / 2;
+                this.ctx.drawImage(img, 0, y, this.canvas.width, newHeight);
+            }
         } else {
             // Fallback - pokud se obrázek ještě nenačetl, použijeme gradient
             const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
@@ -377,16 +388,22 @@ class FlappyBirdGame {
         // Omezení na dostupné obrázky mraků
         cloudImageIndex = Math.min(cloudImageIndex, this.skyImages.length - 1);
         
-        // Vykreslení mraků pomocí obrázků
+        // Vykreslení mraků pomocí obrázků s zachováním poměru stran
         for (let i = 0; i < 2; i++) {
             const x = (Date.now() * 0.005 + i * 300) % (this.canvas.width + 150) - 75;
             const y = 30 + i * 40;
-            const size = 80 + i * 20;
+            const baseSize = 80 + i * 20;
             
             if (this.skyImages[cloudImageIndex] && this.skyImages[cloudImageIndex].complete) {
+                const img = this.skyImages[cloudImageIndex];
+                const imgAspect = img.width / img.height;
+                const newWidth = baseSize;
+                const newHeight = baseSize / imgAspect;
+                const adjustedY = y + (baseSize - newHeight) / 2;
+                
                 this.ctx.drawImage(
-                    this.skyImages[cloudImageIndex],
-                    x, y, size, size * 0.6
+                    img,
+                    x, adjustedY, newWidth, newHeight
                 );
             }
         }
@@ -413,13 +430,19 @@ class FlappyBirdGame {
     drawBird() {
         // Draw bird image
         if (this.birdImage.complete) {
-            // Vykreslí obrázek ptáčka
+            // Vykreslí obrázek ptáčka s zachováním poměru stran
+            const img = this.birdImage;
+            const size = this.bird.size;
+            const imgAspect = img.width / img.height;
+            const newWidth = size;
+            const newHeight = size / imgAspect;
+            const y = this.bird.y + (size - newHeight) / 2;
             this.ctx.drawImage(
-                this.birdImage, 
+                img, 
                 this.bird.x, 
-                this.bird.y, 
-                this.bird.size, 
-                this.bird.size
+                y, 
+                newWidth, 
+                newHeight
             );
         } else {
             // Fallback - pokud se obrázek ještě nenačetl, nakreslíme jednoduchý ptáček
@@ -433,10 +456,13 @@ class FlappyBirdGame {
     drawBonuses() {
         this.bonuses.forEach(bonus => {
             if (this.bonusImages[bonus.type] && this.bonusImages[bonus.type].complete) {
-                this.ctx.drawImage(
-                    this.bonusImages[bonus.type],
-                    bonus.x, bonus.y, 50, 50
-                );
+                const img = this.bonusImages[bonus.type];
+                const size = 50;
+                const imgAspect = img.width / img.height;
+                const newWidth = size;
+                const newHeight = size / imgAspect;
+                const y = bonus.y + (size - newHeight) / 2;
+                this.ctx.drawImage(img, bonus.x, y, newWidth, newHeight);
             } else {
                 // Fallback - nakreslíme barevný kruh
                 this.ctx.fillStyle = bonus.type === 3 ? '#FFD700' : '#FF69B4';
