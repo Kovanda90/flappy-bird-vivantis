@@ -26,26 +26,7 @@ class FlappyBirdGame {
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
         
-        // Boss fight
-        this.boss = {
-            x: 0,
-            y: 0,
-            isActive: false,
-            phase: 'warning', // warning, entering, shooting, leaving
-            health: 3,
-            size: 70,
-            warningTime: 0,
-            shootTime: 0,
-            bullets: []
-        };
-        
-        this.lastBossPhase = 'none';
-        
-        this.bossImage = new Image();
-        this.bossImage.src = 'alzak/alzak.png';
-        this.bossImage.onload = () => {
-            console.log('Boss obrázek načten');
-        };
+
         
         this.birdImage = new Image();
         this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'unicorn.png'; // Načte uložený avatar nebo výchozí
@@ -156,11 +137,7 @@ class FlappyBirdGame {
         this.pipeCount = 0;
         this.lastPipeTime = 0;
         
-        // Reset boss
-        this.boss.isActive = false;
-        this.boss.phase = 'warning';
-        this.boss.bullets = [];
-        this.lastBossPhase = 'none';
+
         
         this.updateScore();
         document.getElementById('game-over').classList.add('hidden');
@@ -174,15 +151,7 @@ class FlappyBirdGame {
         // Hudba pokračuje i při restartu - necháme ji hrát
     }
     
-    startBossFight() {
-        this.boss.isActive = true;
-        this.boss.phase = 'warning';
-        this.boss.warningTime = Date.now();
-        this.boss.x = this.canvas.width + 50; // Blíže k obrazovce
-        this.boss.y = 200;
-        this.boss.bullets = [];
-        console.log(`Boss fight začíná! Canvas: ${this.canvas.width}x${this.canvas.height}, Boss pozice: ${this.boss.x}, ${this.boss.y}`);
-    }
+
 
     jump() {
         if (this.gameRunning) {
@@ -209,10 +178,7 @@ class FlappyBirdGame {
     updatePipes() {
         const currentTime = Date.now();
         
-        // Pozastavení generování tubusů během boss fight
-        if (this.boss.isActive) {
-            return;
-        }
+
         
         // Create new pipes
         if (currentTime - this.lastPipeTime > this.pipeInterval) {
@@ -307,8 +273,7 @@ class FlappyBirdGame {
             }
         }
         
-        // Update boss fight
-        this.updateBoss();
+
     }
 
     checkCollision(pipe) {
@@ -353,142 +318,7 @@ class FlappyBirdGame {
         return false;
     }
     
-    updateBoss() {
-        if (!this.boss.isActive) return;
-        
-        try {
-            const currentTime = Date.now();
-            
-                    // Debug informace (pouze při změně fáze)
-        if (this.boss.phase !== this.lastBossPhase) {
-            console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
-            this.lastBossPhase = this.boss.phase;
-        }
-        
-        // Debug - každých 60 frameů (1x za sekundu)
-        if (Math.floor(Date.now() / 1000) % 2 === 0) {
-            console.log(`Boss debug: active=${this.boss.isActive}, phase=${this.boss.phase}, x=${this.boss.x}, y=${this.boss.y}`);
-        }
-        
-        switch (this.boss.phase) {
-            case 'warning':
-                // 1 sekunda varování (pro testování)
-                if (currentTime - this.boss.warningTime > 1000) {
-                    this.boss.phase = 'entering';
-                }
-                break;
-                
-            case 'entering':
-                // Boss vjede zprava
-                this.boss.x -= 3;
-                if (this.boss.x <= this.canvas.width - 100) {
-                    this.boss.phase = 'shooting';
-                    this.boss.shootTime = currentTime;
-                }
-                break;
-                
-            case 'shooting':
-                // Vystřelí 3 střely s 0.5s odstupem
-                if (this.boss.bullets.length < 3 && currentTime - this.boss.shootTime > 500) {
-                    this.boss.bullets.push({
-                        x: this.boss.x,
-                        y: this.boss.y + this.boss.size / 2,
-                        speed: 4, // Rychlejší než tubusy
-                        active: true
-                    });
-                    this.boss.shootTime = currentTime;
-                }
-                
-                // Po vystřelení všech střel přejde do fáze leaving
-                if (this.boss.bullets.length >= 3 && this.boss.bullets.every(bullet => !bullet.active)) {
-                    this.boss.phase = 'leaving';
-                }
-                break;
-                
-            case 'leaving':
-                // Boss odletí nahoru
-                this.boss.y -= 2;
-                if (this.boss.y < -100) {
-                    this.boss.isActive = false;
-                    this.boss.bullets = [];
-                }
-                break;
-        }
-        
-        // Update bullets
-        for (let i = this.boss.bullets.length - 1; i >= 0; i--) {
-            const bullet = this.boss.bullets[i];
-            if (bullet.active) {
-                bullet.x -= bullet.speed;
-                
-                // Remove bullets that are off screen
-                if (bullet.x < -20) {
-                    bullet.active = false;
-                }
-                
-                // Check collision with bird
-                if (this.checkBossBulletCollision(bullet)) {
-                    bullet.active = false;
-                    this.gameOver();
-                    return;
-                }
-            }
-        }
-        
-        // Check collision with boss
-        if (this.checkBossCollision()) {
-            this.gameOver();
-            return;
-        }
-        } catch (error) {
-            console.error('Chyba v updateBoss:', error);
-            // V případě chyby deaktivujeme boss
-            this.boss.isActive = false;
-        }
-    }
     
-    checkBossCollision() {
-        if (!this.boss.isActive) return false;
-        
-        const birdRight = this.bird.x + this.bird.size;
-        const birdLeft = this.bird.x;
-        const birdTop = this.bird.y;
-        const birdBottom = this.bird.y + this.bird.size;
-        
-        const bossRight = this.boss.x + this.boss.size;
-        const bossLeft = this.boss.x;
-        const bossTop = this.boss.y;
-        const bossBottom = this.boss.y + this.boss.size;
-        
-        // Check if bird collides with boss
-        if (birdRight > bossLeft && birdLeft < bossRight && 
-            birdBottom > bossTop && birdTop < bossBottom) {
-            console.log('Kolize s bossem! Boss pozice:', this.boss.x, this.boss.y);
-            return true;
-        }
-        
-        return false;
-    }
-    
-    checkBossBulletCollision(bullet) {
-        const birdRight = this.bird.x + this.bird.size;
-        const birdLeft = this.bird.x;
-        const birdTop = this.bird.y;
-        const birdBottom = this.bird.y + this.bird.size;
-        
-        const bulletRight = bullet.x + 10;
-        const bulletLeft = bullet.x;
-        const bulletTop = bullet.y;
-        const bulletBottom = bullet.y + 10;
-        
-        // Check if bird collides with bullet
-        if (birdRight > bulletLeft && birdLeft < bulletRight && 
-            birdBottom > bulletTop && birdTop < bulletBottom) {
-            return true;
-        }
-        
-        return false;
-    }
 
     updateScore() {
         document.getElementById('score').textContent = this.score;
@@ -504,10 +334,7 @@ class FlappyBirdGame {
             document.getElementById('level').textContent = `Úroveň ${level}`;
         }
         
-        // Spouštění boss fight každých 1 bod (pro testování)
-        if (this.score > 0 && this.score % 1 === 0 && !this.boss.isActive) {
-            this.startBossFight();
-        }
+
     }
 
     gameOver() {
@@ -532,8 +359,7 @@ class FlappyBirdGame {
         // Draw bonuses
         this.drawBonuses();
         
-        // Draw boss fight
-        this.drawBoss();
+
         
         // Draw bird
         this.drawBird();
@@ -665,76 +491,14 @@ class FlappyBirdGame {
         });
     }
     
-    drawBoss() {
-        if (!this.boss.isActive) return;
-        
-        console.log(`DrawBoss: active=${this.boss.isActive}, phase=${this.boss.phase}, x=${this.boss.x}, y=${this.boss.y}`);
-        
-        try {
-        
-        // Draw warning light (malá zelená siréna)
-        if (this.boss.phase === 'warning') {
-            const warningAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
-            
-            console.log(`Vykresluji warning: canvas=${this.canvas.width}x${this.canvas.height}, alpha=${warningAlpha}`);
-            
-            // Malá blikající siréna v pravém horním rohu
-            this.ctx.fillStyle = `rgba(0, 255, 0, ${warningAlpha})`;
-            this.ctx.fillRect(this.canvas.width - 60, 20, 40, 40);
-            
-            // Černý střed sirény
-            this.ctx.fillStyle = 'black';
-            this.ctx.fillRect(this.canvas.width - 50, 30, 20, 20);
-            
-            // Warning text
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 2rem Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('BOSS FIGHT!', this.canvas.width / 2, this.canvas.height / 2);
-        }
-        
-        // Draw boss
-        if (this.boss.phase !== 'warning') {
-            // Vždy použijeme fallback červený čtverec (obrázek se nenačte)
-            this.ctx.fillStyle = 'red';
-            this.ctx.fillRect(this.boss.x, this.boss.y, this.boss.size, this.boss.size);
-            
-            // Přidáme text "BOSS" do čtverce
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = 'bold 1rem Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('BOSS', this.boss.x + this.boss.size/2, this.boss.y + this.boss.size/2 + 5);
-        }
-        
-        // Draw bullets
-        this.boss.bullets.forEach(bullet => {
-            if (bullet.active) {
-                // Zelené střely
-                this.ctx.fillStyle = '#00FF00';
-                this.ctx.beginPath();
-                this.ctx.arc(bullet.x + 5, bullet.y + 5, 5, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // Particle efekty za střelami
-                this.ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
-                for (let i = 0; i < 3; i++) {
-                    this.ctx.beginPath();
-                    this.ctx.arc(bullet.x + 10 + i * 3, bullet.y + 5, 2, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-            }
-        });
-        } catch (error) {
-            console.error('Chyba v drawBoss:', error);
-        }
-    }
+
 
     gameLoop() {
         if (!this.gameRunning) return;
         
         this.updateBird();
         this.updatePipes();
-        this.updateBoss(); // Přidáno volání updateBoss
+
         this.draw();
         
         requestAnimationFrame(() => this.gameLoop());
