@@ -90,6 +90,7 @@ class FlappyBirdGame {
     setupCanvas() {
         this.canvas.width = this.canvas.offsetWidth;
         this.canvas.height = this.canvas.offsetHeight;
+        console.log(`Canvas nastaven: ${this.canvas.width}x${this.canvas.height}`);
     }
 
     setupEventListeners() {
@@ -180,7 +181,7 @@ class FlappyBirdGame {
         this.boss.x = this.canvas.width + 50; // Blíže k obrazovce
         this.boss.y = 200;
         this.boss.bullets = [];
-        console.log('Boss fight začíná!');
+        console.log(`Boss fight začíná! Canvas: ${this.canvas.width}x${this.canvas.height}, Boss pozice: ${this.boss.x}, ${this.boss.y}`);
     }
 
     jump() {
@@ -667,11 +668,15 @@ class FlappyBirdGame {
     drawBoss() {
         if (!this.boss.isActive) return;
         
+        console.log(`DrawBoss: active=${this.boss.isActive}, phase=${this.boss.phase}, x=${this.boss.x}, y=${this.boss.y}`);
+        
         try {
         
         // Draw warning light (malá zelená siréna)
         if (this.boss.phase === 'warning') {
             const warningAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
+            
+            console.log(`Vykresluji warning: canvas=${this.canvas.width}x${this.canvas.height}, alpha=${warningAlpha}`);
             
             // Malá blikající siréna v pravém horním rohu
             this.ctx.fillStyle = `rgba(0, 255, 0, ${warningAlpha})`;
