@@ -372,8 +372,8 @@ class FlappyBirdGame {
         
         switch (this.boss.phase) {
             case 'warning':
-                // 3 sekundy varování
-                if (currentTime - this.boss.warningTime > 3000) {
+                // 1 sekunda varování (pro testování)
+                if (currentTime - this.boss.warningTime > 1000) {
                     this.boss.phase = 'entering';
                 }
                 break;
@@ -504,8 +504,8 @@ class FlappyBirdGame {
             document.getElementById('level').textContent = `Úroveň ${level}`;
         }
         
-        // Spouštění boss fight každých 5 bodů
-        if (this.score > 0 && this.score % 5 === 0 && !this.boss.isActive) {
+        // Spouštění boss fight každých 1 bod (pro testování)
+        if (this.score > 0 && this.score % 1 === 0 && !this.boss.isActive) {
             this.startBossFight();
         }
     }
