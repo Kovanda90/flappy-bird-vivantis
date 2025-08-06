@@ -168,7 +168,7 @@ class FlappyBirdGame {
         this.boss.isActive = true;
         this.boss.phase = 'warning';
         this.boss.warningTime = Date.now();
-        this.boss.x = this.canvas.width + 100; // Začíná mimo obrazovku
+        this.boss.x = this.canvas.width + 50; // Blíže k obrazovce
         this.boss.y = 200;
         this.boss.bullets = [];
         console.log('Boss fight začíná!');
@@ -348,6 +348,9 @@ class FlappyBirdGame {
         
         const currentTime = Date.now();
         
+        // Debug informace
+        console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
+        
         switch (this.boss.phase) {
             case 'warning':
                 // 3 sekundy varování
@@ -359,7 +362,7 @@ class FlappyBirdGame {
             case 'entering':
                 // Boss vjede zprava
                 this.boss.x -= 3;
-                if (this.boss.x <= this.canvas.width - 150) {
+                if (this.boss.x <= this.canvas.width - 100) {
                     this.boss.phase = 'shooting';
                     this.boss.shootTime = currentTime;
                 }
@@ -638,11 +641,17 @@ class FlappyBirdGame {
     drawBoss() {
         if (!this.boss.isActive) return;
         
-        // Draw warning light (zelená siréna)
+        // Draw warning light (malá zelená siréna)
         if (this.boss.phase === 'warning') {
             const warningAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
+            
+            // Malá blikající siréna v pravém horním rohu
             this.ctx.fillStyle = `rgba(0, 255, 0, ${warningAlpha})`;
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillRect(this.canvas.width - 60, 20, 40, 40);
+            
+            // Černý střed sirény
+            this.ctx.fillStyle = 'black';
+            this.ctx.fillRect(this.canvas.width - 50, 30, 20, 20);
             
             // Warning text
             this.ctx.fillStyle = 'white';
