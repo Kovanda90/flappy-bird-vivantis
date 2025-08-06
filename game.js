@@ -39,6 +39,8 @@ class FlappyBirdGame {
             bullets: []
         };
         
+        this.lastBossPhase = 'none';
+        
         this.bossImage = new Image();
         this.bossImage.src = 'alzak/alzak.png';
         this.bossImage.onload = () => {
@@ -348,8 +350,11 @@ class FlappyBirdGame {
         
         const currentTime = Date.now();
         
-        // Debug informace
-        console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
+        // Debug informace (pouze při změně fáze)
+        if (this.boss.phase !== this.lastBossPhase) {
+            console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
+            this.lastBossPhase = this.boss.phase;
+        }
         
         switch (this.boss.phase) {
             case 'warning':
@@ -693,6 +698,7 @@ class FlappyBirdGame {
         
         this.updateBird();
         this.updatePipes();
+        this.updateBoss(); // Přidáno volání updateBoss
         this.draw();
         
         requestAnimationFrame(() => this.gameLoop());
