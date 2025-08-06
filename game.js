@@ -22,11 +22,10 @@ class FlappyBirdGame {
         // Bonusové předměty
         this.bonuses = [];
         this.bonusImages = [];
-        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png', 'alzak/alzak.png'];
+        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png'];
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
-        this.alzakCount = 0; // Počítadlo pro alzak (každých 7 průletů)
-        this.minusPointsTime = 0; // Reset minus points display
+
 
         
 
@@ -214,17 +213,7 @@ class FlappyBirdGame {
                 });
             }
             
-            // Přidání alzaka každých 7 průletů (samostatně)
-            if (this.alzakCount >= 7) {
-                this.bonuses.push({
-                    x: this.canvas.width + 100,
-                    y: Math.random() * (this.canvas.height - 100) + 50, // Náhodná pozice
-                    type: 4, // alzak
-                    collected: false,
-                    isAlzak: true
-                });
-                this.alzakCount = 0; // Reset counter
-            }
+
             
             this.lastPipeTime = currentTime;
         }
@@ -260,7 +249,7 @@ class FlappyBirdGame {
                 pipe.passed = true;
                 this.score++;
                 this.pipeCount++;
-                this.alzakCount++; // Zvýšíme počítadlo pro alzaka
+
                 this.updateScore();
             }
         }
@@ -281,9 +270,6 @@ class FlappyBirdGame {
                 bonus.collected = true;
                 if (bonus.type === 3) { // flash
                     this.extraLives++;
-                } else if (bonus.type === 4) { // alzak
-                    this.score = Math.max(0, this.score - 5); // Odečte 5 bodů (minimum 0)
-                    this.showMinusPoints(); // Zobrazí červený text -5
                 } else { // ring, ceresne, lipstick
                     this.score += 5; // Přidá 5 bodů přímo k hlavnímu skóre
                 }
@@ -354,9 +340,7 @@ class FlappyBirdGame {
         }
     }
     
-    showMinusPoints() {
-        this.minusPointsTime = Date.now();
-    }
+
 
     gameOver() {
         this.gameRunning = false;
@@ -385,8 +369,7 @@ class FlappyBirdGame {
         // Draw bird
         this.drawBird();
         
-        // Draw minus points if active
-        this.drawMinusPoints();
+
     }
 
     drawBackground() {
@@ -507,9 +490,7 @@ class FlappyBirdGame {
                 this.ctx.drawImage(img, bonus.x, y, newWidth, newHeight);
             } else {
                 // Fallback - nakreslíme barevný kruh
-                if (bonus.type === 4) { // alzak
-                    this.ctx.fillStyle = '#FF0000'; // Červená pro alzaka
-                } else if (bonus.type === 3) { // flash
+                if (bonus.type === 3) { // flash
                     this.ctx.fillStyle = '#FFD700';
                 } else {
                     this.ctx.fillStyle = '#FF69B4';
@@ -521,16 +502,7 @@ class FlappyBirdGame {
         });
     }
     
-    drawMinusPoints() {
-        if (this.minusPointsTime > 0 && Date.now() - this.minusPointsTime < 2000) { // Zobrazí se na 2 sekundy
-            const alpha = Math.max(0, 1 - (Date.now() - this.minusPointsTime) / 2000);
-            
-            this.ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`;
-            this.ctx.font = 'bold 2rem Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('-5', this.canvas.width / 2, this.canvas.height / 2 - 50);
-        }
-    }
+
 
 
     gameLoop() {
