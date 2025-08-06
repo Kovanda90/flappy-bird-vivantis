@@ -154,6 +154,13 @@ class FlappyBirdGame {
         this.extraLives = 0;
         this.pipeCount = 0;
         this.lastPipeTime = 0;
+        
+        // Reset boss
+        this.boss.isActive = false;
+        this.boss.phase = 'warning';
+        this.boss.bullets = [];
+        this.lastBossPhase = 'none';
+        
         this.updateScore();
         document.getElementById('game-over').classList.add('hidden');
     }
@@ -348,13 +355,14 @@ class FlappyBirdGame {
     updateBoss() {
         if (!this.boss.isActive) return;
         
-        const currentTime = Date.now();
-        
-        // Debug informace (pouze při změně fáze)
-        if (this.boss.phase !== this.lastBossPhase) {
-            console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
-            this.lastBossPhase = this.boss.phase;
-        }
+        try {
+            const currentTime = Date.now();
+            
+            // Debug informace (pouze při změně fáze)
+            if (this.boss.phase !== this.lastBossPhase) {
+                console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
+                this.lastBossPhase = this.boss.phase;
+            }
         
         switch (this.boss.phase) {
             case 'warning':
@@ -425,6 +433,11 @@ class FlappyBirdGame {
         if (this.checkBossCollision()) {
             this.gameOver();
             return;
+        }
+        } catch (error) {
+            console.error('Chyba v updateBoss:', error);
+            // V případě chyby deaktivujeme boss
+            this.boss.isActive = false;
         }
     }
     
@@ -646,6 +659,8 @@ class FlappyBirdGame {
     drawBoss() {
         if (!this.boss.isActive) return;
         
+        try {
+        
         // Draw warning light (malá zelená siréna)
         if (this.boss.phase === 'warning') {
             const warningAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
@@ -691,6 +706,9 @@ class FlappyBirdGame {
                 }
             }
         });
+        } catch (error) {
+            console.error('Chyba v drawBoss:', error);
+        }
     }
 
     gameLoop() {
