@@ -358,11 +358,16 @@ class FlappyBirdGame {
         try {
             const currentTime = Date.now();
             
-            // Debug informace (pouze při změně fáze)
-            if (this.boss.phase !== this.lastBossPhase) {
-                console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
-                this.lastBossPhase = this.boss.phase;
-            }
+                    // Debug informace (pouze při změně fáze)
+        if (this.boss.phase !== this.lastBossPhase) {
+            console.log(`Boss phase: ${this.boss.phase}, x: ${this.boss.x}, y: ${this.boss.y}`);
+            this.lastBossPhase = this.boss.phase;
+        }
+        
+        // Debug - každých 60 frameů (1x za sekundu)
+        if (Math.floor(Date.now() / 1000) % 2 === 0) {
+            console.log(`Boss debug: active=${this.boss.isActive}, phase=${this.boss.phase}, x=${this.boss.x}, y=${this.boss.y}`);
+        }
         
         switch (this.boss.phase) {
             case 'warning':
@@ -442,6 +447,8 @@ class FlappyBirdGame {
     }
     
     checkBossCollision() {
+        if (!this.boss.isActive) return false;
+        
         const birdRight = this.bird.x + this.bird.size;
         const birdLeft = this.bird.x;
         const birdTop = this.bird.y;
@@ -455,6 +462,7 @@ class FlappyBirdGame {
         // Check if bird collides with boss
         if (birdRight > bossLeft && birdLeft < bossRight && 
             birdBottom > bossTop && birdTop < bossBottom) {
+            console.log('Kolize s bossem! Boss pozice:', this.boss.x, this.boss.y);
             return true;
         }
         
@@ -681,11 +689,18 @@ class FlappyBirdGame {
         }
         
         // Draw boss
-        if (this.boss.phase !== 'warning' && this.bossImage.complete) {
-            this.ctx.drawImage(
-                this.bossImage,
-                this.boss.x, this.boss.y, this.boss.size, this.boss.size
-            );
+        if (this.boss.phase !== 'warning') {
+            if (this.bossImage.complete) {
+                this.ctx.drawImage(
+                    this.bossImage,
+                    this.boss.x, this.boss.y, this.boss.size, this.boss.size
+                );
+            } else {
+                // Fallback - červený čtverec pro boss
+                this.ctx.fillStyle = 'red';
+                this.ctx.fillRect(this.boss.x, this.boss.y, this.boss.size, this.boss.size);
+                console.log('Boss obrázek se nenačetl, používám fallback');
+            }
         }
         
         // Draw bullets
