@@ -161,12 +161,13 @@ body {
     width: 100%;
     overflow-y: auto;
     margin-bottom: 20px;
-    max-height: calc(100vh - 200px); /* Omezí výšku na mobilních zařízeních */
+    max-height: calc(100vh - 250px); /* Větší rezerva pro tlačítko */
 }
 
 #leaderboard-screen .btn {
     flex-shrink: 0; /* Zabrání zmenšení tlačítka */
-    margin-top: auto; /* Posune tlačítko dolů */
+    margin-top: 20px; /* Pevná mezera pod žebříčkem */
+    position: relative; /* Zajistí, že tlačítko zůstane na svém místě */
 }
 
 .leaderboard-item {
@@ -275,6 +276,7 @@ body {
     /* Oprava pro žebříček na mobilních zařízeních */
     #leaderboard-screen {
         padding: 15px;
+        padding-bottom: 80px; /* Rezerva pro tlačítko a lištu prohlížeče */
     }
     
     #leaderboard-screen h2 {
@@ -283,7 +285,7 @@ body {
     }
     
     #leaderboard-list {
-        max-height: calc(100vh - 250px);
+        max-height: calc(100vh - 300px); /* Větší rezerva na mobilních zařízeních */
         margin-bottom: 15px;
     }
     
