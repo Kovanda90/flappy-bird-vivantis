@@ -695,17 +695,15 @@ class FlappyBirdGame {
         
         // Draw boss
         if (this.boss.phase !== 'warning') {
-            if (this.bossImage.complete) {
-                this.ctx.drawImage(
-                    this.bossImage,
-                    this.boss.x, this.boss.y, this.boss.size, this.boss.size
-                );
-            } else {
-                // Fallback - červený čtverec pro boss
-                this.ctx.fillStyle = 'red';
-                this.ctx.fillRect(this.boss.x, this.boss.y, this.boss.size, this.boss.size);
-                console.log('Boss obrázek se nenačetl, používám fallback');
-            }
+            // Vždy použijeme fallback červený čtverec (obrázek se nenačte)
+            this.ctx.fillStyle = 'red';
+            this.ctx.fillRect(this.boss.x, this.boss.y, this.boss.size, this.boss.size);
+            
+            // Přidáme text "BOSS" do čtverce
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = 'bold 1rem Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('BOSS', this.boss.x + this.boss.size/2, this.boss.y + this.boss.size/2 + 5);
         }
         
         // Draw bullets
