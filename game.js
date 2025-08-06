@@ -26,6 +26,25 @@ class FlappyBirdGame {
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
         
+        // Boss fight
+        this.boss = {
+            x: 0,
+            y: 0,
+            isActive: false,
+            phase: 'warning', // warning, entering, shooting, leaving
+            health: 3,
+            size: 70,
+            warningTime: 0,
+            shootTime: 0,
+            bullets: []
+        };
+        
+        this.bossImage = new Image();
+        this.bossImage.src = 'alzak/alzak.png';
+        this.bossImage.onload = () => {
+            console.log('Boss obrázek načten');
+        };
+        
         this.birdImage = new Image();
         this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'unicorn.png'; // Načte uložený avatar nebo výchozí
         this.birdImage.src = `ptacek/${this.selectedAvatar}`;
@@ -144,6 +163,16 @@ class FlappyBirdGame {
         
         // Hudba pokračuje i při restartu - necháme ji hrát
     }
+    
+    startBossFight() {
+        this.boss.isActive = true;
+        this.boss.phase = 'warning';
+        this.boss.warningTime = Date.now();
+        this.boss.x = this.canvas.width + 100; // Začíná mimo obrazovku
+        this.boss.y = 200;
+        this.boss.bullets = [];
+        console.log('Boss fight začíná!');
+    }
 
     jump() {
         if (this.gameRunning) {
@@ -169,6 +198,11 @@ class FlappyBirdGame {
 
     updatePipes() {
         const currentTime = Date.now();
+        
+        // Pozastavení generování tubusů během boss fight
+        if (this.boss.isActive) {
+            return;
+        }
         
         // Create new pipes
         if (currentTime - this.lastPipeTime > this.pipeInterval) {
@@ -262,6 +296,9 @@ class FlappyBirdGame {
                 this.updateScore(); // Aktualizuje zobrazení skóre
             }
         }
+        
+        // Update boss fight
+        this.updateBoss();
     }
 
     checkCollision(pipe) {
@@ -305,6 +342,123 @@ class FlappyBirdGame {
         
         return false;
     }
+    
+    updateBoss() {
+        if (!this.boss.isActive) return;
+        
+        const currentTime = Date.now();
+        
+        switch (this.boss.phase) {
+            case 'warning':
+                // 3 sekundy varování
+                if (currentTime - this.boss.warningTime > 3000) {
+                    this.boss.phase = 'entering';
+                }
+                break;
+                
+            case 'entering':
+                // Boss vjede zprava
+                this.boss.x -= 3;
+                if (this.boss.x <= this.canvas.width - 150) {
+                    this.boss.phase = 'shooting';
+                    this.boss.shootTime = currentTime;
+                }
+                break;
+                
+            case 'shooting':
+                // Vystřelí 3 střely s 0.5s odstupem
+                if (this.boss.bullets.length < 3 && currentTime - this.boss.shootTime > 500) {
+                    this.boss.bullets.push({
+                        x: this.boss.x,
+                        y: this.boss.y + this.boss.size / 2,
+                        speed: 4, // Rychlejší než tubusy
+                        active: true
+                    });
+                    this.boss.shootTime = currentTime;
+                }
+                
+                // Po vystřelení všech střel přejde do fáze leaving
+                if (this.boss.bullets.length >= 3 && this.boss.bullets.every(bullet => !bullet.active)) {
+                    this.boss.phase = 'leaving';
+                }
+                break;
+                
+            case 'leaving':
+                // Boss odletí nahoru
+                this.boss.y -= 2;
+                if (this.boss.y < -100) {
+                    this.boss.isActive = false;
+                    this.boss.bullets = [];
+                }
+                break;
+        }
+        
+        // Update bullets
+        for (let i = this.boss.bullets.length - 1; i >= 0; i--) {
+            const bullet = this.boss.bullets[i];
+            if (bullet.active) {
+                bullet.x -= bullet.speed;
+                
+                // Remove bullets that are off screen
+                if (bullet.x < -20) {
+                    bullet.active = false;
+                }
+                
+                // Check collision with bird
+                if (this.checkBossBulletCollision(bullet)) {
+                    bullet.active = false;
+                    this.gameOver();
+                    return;
+                }
+            }
+        }
+        
+        // Check collision with boss
+        if (this.checkBossCollision()) {
+            this.gameOver();
+            return;
+        }
+    }
+    
+    checkBossCollision() {
+        const birdRight = this.bird.x + this.bird.size;
+        const birdLeft = this.bird.x;
+        const birdTop = this.bird.y;
+        const birdBottom = this.bird.y + this.bird.size;
+        
+        const bossRight = this.boss.x + this.boss.size;
+        const bossLeft = this.boss.x;
+        const bossTop = this.boss.y;
+        const bossBottom = this.boss.y + this.boss.size;
+        
+        // Check if bird collides with boss
+        if (birdRight > bossLeft && birdLeft < bossRight && 
+            birdBottom > bossTop && birdTop < bossBottom) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    checkBossBulletCollision(bullet) {
+        const birdRight = this.bird.x + this.bird.size;
+        const birdLeft = this.bird.x;
+        const birdTop = this.bird.y;
+        const birdBottom = this.bird.y + this.bird.size;
+        
+        const bulletRight = bullet.x + 10;
+        const bulletLeft = bullet.x;
+        const bulletTop = bullet.y;
+        const bulletBottom = bullet.y + 10;
+        
+        // Check if bird collides with bullet
+        if (birdRight > bulletLeft && birdLeft < bulletRight && 
+            birdBottom > bulletTop && birdTop < bulletBottom) {
+            return true;
+        }
+        
+        return false;
+    }
 
     updateScore() {
         document.getElementById('score').textContent = this.score;
@@ -318,6 +472,11 @@ class FlappyBirdGame {
             if (this.score >= 10) level = 2;
             if (this.score >= 20) level = 3;
             document.getElementById('level').textContent = `Úroveň ${level}`;
+        }
+        
+        // Spouštění boss fight každých 5 bodů
+        if (this.score > 0 && this.score % 5 === 0 && !this.boss.isActive) {
+            this.startBossFight();
         }
     }
 
@@ -342,6 +501,9 @@ class FlappyBirdGame {
         
         // Draw bonuses
         this.drawBonuses();
+        
+        // Draw boss fight
+        this.drawBoss();
         
         // Draw bird
         this.drawBird();
@@ -469,6 +631,50 @@ class FlappyBirdGame {
                 this.ctx.beginPath();
                 this.ctx.arc(bonus.x + 25, bonus.y + 25, 25, 0, Math.PI * 2);
                 this.ctx.fill();
+            }
+        });
+    }
+    
+    drawBoss() {
+        if (!this.boss.isActive) return;
+        
+        // Draw warning light (zelená siréna)
+        if (this.boss.phase === 'warning') {
+            const warningAlpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
+            this.ctx.fillStyle = `rgba(0, 255, 0, ${warningAlpha})`;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            // Warning text
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = 'bold 2rem Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('BOSS FIGHT!', this.canvas.width / 2, this.canvas.height / 2);
+        }
+        
+        // Draw boss
+        if (this.boss.phase !== 'warning' && this.bossImage.complete) {
+            this.ctx.drawImage(
+                this.bossImage,
+                this.boss.x, this.boss.y, this.boss.size, this.boss.size
+            );
+        }
+        
+        // Draw bullets
+        this.boss.bullets.forEach(bullet => {
+            if (bullet.active) {
+                // Zelené střely
+                this.ctx.fillStyle = '#00FF00';
+                this.ctx.beginPath();
+                this.ctx.arc(bullet.x + 5, bullet.y + 5, 5, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // Particle efekty za střelami
+                this.ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+                for (let i = 0; i < 3; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(bullet.x + 10 + i * 3, bullet.y + 5, 2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
             }
         });
     }
