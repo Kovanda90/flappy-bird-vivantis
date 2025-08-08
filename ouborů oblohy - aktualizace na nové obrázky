@@ -1,0 +1,36 @@
+warning: in the working copy of 'game.js', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/game.js b/game.js[m
+[1mindex 48e1d8f..5962de8 100644[m
+[1m--- a/game.js[m
+[1m+++ b/game.js[m
+[36m@@ -39,7 +39,7 @@[m [mclass FlappyBirdGame {[m
+         [m
+         // Načtení obrázků oblohy[m
+         this.skyImages = [];[m
+[31m-        this.skyImageNames = ['obloha.jpg', 'mrak1.png', 'mrak2.png', 'mrak3.png'];[m
+[32m+[m[32m        this.skyImageNames = ['pozadi_nove.jpg', 'mrak1 1.png', 'mrak2 1.png', 'mrak3 1.png'];[m
+         [m
+         this.skyImageNames.forEach((imageName, index) => {[m
+             const img = new Image();[m
+[36m@@ -373,7 +373,7 @@[m [mclass FlappyBirdGame {[m
+     }[m
+ [m
+     drawBackground() {[m
+[31m-        // Vykreslení hlavního obrázku oblohy (obloha.jpg) s zachováním poměru stran[m
+[32m+[m[32m        // Vykreslení hlavního obrázku oblohy (pozadi_nove.jpg) s zachováním poměru stran[m
+         if (this.skyImages[0] && this.skyImages[0].complete) {[m
+             const img = this.skyImages[0];[m
+             const imgAspect = img.width / img.height;[m
+[36m@@ -406,9 +406,9 @@[m [mclass FlappyBirdGame {[m
+ [m
+     drawClouds() {[m
+         // Výběr obrázku mraku podle skóre[m
+[31m-        let cloudImageIndex = 1; // Začínáme s mrak1.png[m
+[31m-        if (this.score >= 10) cloudImageIndex = 2; // mrak2.png[m
+[31m-        if (this.score >= 20) cloudImageIndex = 3; // mrak3.png[m
+[32m+[m[32m                    let cloudImageIndex = 1; // Začínáme s mrak1 1.png[m
+[32m+[m[32m        if (this.score >= 10) cloudImageIndex = 2; // mrak2 1.png[m
+[32m+[m[32m        if (this.score >= 20) cloudImageIndex = 3; // mrak3 1.png[m
+         [m
+         // Omezení na dostupné obrázky mraků[m
+         cloudImageIndex = Math.min(cloudImageIndex, this.skyImages.length - 1);[m

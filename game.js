@@ -39,7 +39,7 @@ class FlappyBirdGame {
         
         // Načtení obrázků oblohy
         this.skyImages = [];
-        this.skyImageNames = ['obloha.jpg', 'mrak1.png', 'mrak2.png', 'mrak3.png'];
+        this.skyImageNames = ['pozadi_nove.jpg', 'mrak1 1.png', 'mrak2 1.png', 'mrak3 1.png'];
         
         this.skyImageNames.forEach((imageName, index) => {
             const img = new Image();
@@ -373,7 +373,7 @@ class FlappyBirdGame {
     }
 
     drawBackground() {
-        // Vykreslení hlavního obrázku oblohy (obloha.jpg) s zachováním poměru stran
+        // Vykreslení hlavního obrázku oblohy (pozadi_nove.jpg) s zachováním poměru stran
         if (this.skyImages[0] && this.skyImages[0].complete) {
             const img = this.skyImages[0];
             const imgAspect = img.width / img.height;
@@ -406,9 +406,9 @@ class FlappyBirdGame {
 
     drawClouds() {
         // Výběr obrázku mraku podle skóre
-        let cloudImageIndex = 1; // Začínáme s mrak1.png
-        if (this.score >= 10) cloudImageIndex = 2; // mrak2.png
-        if (this.score >= 20) cloudImageIndex = 3; // mrak3.png
+                    let cloudImageIndex = 1; // Začínáme s mrak1 1.png
+        if (this.score >= 10) cloudImageIndex = 2; // mrak2 1.png
+        if (this.score >= 20) cloudImageIndex = 3; // mrak3 1.png
         
         // Omezení na dostupné obrázky mraků
         cloudImageIndex = Math.min(cloudImageIndex, this.skyImages.length - 1);
