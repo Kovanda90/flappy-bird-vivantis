@@ -584,10 +584,12 @@ class FlappyBirdGame {
                 console.log('Žebříček načten z localStorage:', this.leaderboard.length, 'záznamů');
             }
             
-            // Odstraníme duplikáty a seřadíme
-            this.removeDuplicates();
+            // Seřadíme a omezíme na top 10
             this.leaderboard.sort((a, b) => b.score - a.score);
             this.leaderboard = this.leaderboard.slice(0, 10);
+            
+            // Odstraníme duplikáty až po omezení na 10
+            this.removeDuplicates();
             
         } catch (error) {
             console.error('Chyba při načítání žebříčku:', error);
@@ -596,9 +598,11 @@ class FlappyBirdGame {
             console.log('Fallback na localStorage:', this.leaderboard.length, 'záznamů');
             
             // I zde odstraníme duplikáty
-            this.removeDuplicates();
             this.leaderboard.sort((a, b) => b.score - a.score);
             this.leaderboard = this.leaderboard.slice(0, 10);
+            
+            // Odstraníme duplikáty až po omezení na 10
+            this.removeDuplicates();
         }
     }
 
