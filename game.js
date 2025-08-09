@@ -664,9 +664,15 @@ class FlappyBirdGame {
         const nameInput = document.getElementById('player-name-input');
         const saveBtn = document.getElementById('save-name-btn');
         const cancelBtn = document.getElementById('cancel-name-btn');
+        const scoreMessage = document.getElementById('score-message');
 
         // Zobrazí dialog
         this.showScreen('name-dialog');
+        
+        // Zobrazí vtipný text podle skóre
+        const message = this.getRandomMessage(this.score);
+        scoreMessage.textContent = message;
+        
         nameInput.focus();
         nameInput.value = '';
 
@@ -795,10 +801,74 @@ class FlappyBirdGame {
         localStorage.setItem('selectedAvatar', avatarName);
     }
     
+    // Funkce pro získání náhodného vtipného textu podle skóre
+    getRandomMessage(score) {
+        const messages = {
+            'ultra-looser': [
+                "Ty seš úplný mimoň! Ptáček má větší IQ než ty! 🧠",
+                "Tohle je nový světový rekord v neúspěchu! Gratuluji! 🏆",
+                "Asi máš dneska špatný den... nebo celý život! 😅",
+                "Tohle je úroveň 'nevidím světlo ani na konci tunelu'! 🌙"
+            ],
+            'stale-looser': [
+                "Už to jde! Ale pořád jsi amatér! 😤",
+                "Tohle je úroveň 'mám talent, ale neumím ho využít'! ⭐",
+                "Už nejsi úplný mimoň, jenom částečný! 😅",
+                "Tohle je úroveň 'vidím světlo, ale neumím k němu doletět'! 💡"
+            ],
+            'stredni': [
+                "Hej, už to není tak špatný! Ale pořád jsi průměrný! 😐",
+                "Tohle je úroveň 'mám život pod kontrolou... někdy'! 🎮",
+                "Skoro jsi profík... skoro! 🎯",
+                "Tohle je úroveň 'mám talent, ale neumím ho využít naplno'! ⚡"
+            ],
+            'dobry': [
+                "Wow, ty umíš hrát! Respekt! 🎉",
+                "Tohle je úroveň 'mám život pod kontrolou'! 🎯",
+                "Skoro jsi mistr... skoro! 🏆",
+                "Tohle je úroveň 'mám talent a umím ho využít'! ⭐"
+            ],
+            'vyborny': [
+                "Ty jsi skoro legenda! Skoro! 🌟",
+                "Tohle je úroveň 'mám příliš mnoho volného času'! 😂",
+                "Už jsi lepší než průměrný Flappy Bird! 🐦🔥",
+                "Máš můj respekt, pane! 👏",
+                "Tohle je úroveň 'mám talent a umím ho využít naplno'! ⚡"
+            ],
+            'mistr': [
+                "Ty jsi absolutní mistr! Respekt! 🏆",
+                "Tohle je úroveň 'mám život pod kontrolou a umím ho využít'! 🎯",
+                "Už jsi lepší než většina legend! 🌟",
+                "Skoro jsi bůh... skoro! 👑",
+                "Tohle je úroveň 'mám talent, umím ho využít a umím ho využít naplno'! ⚡"
+            ],
+            'fucking-legend': [
+                "Fucking legend! Tleskám rukama nad hlavou! 👏👏🎉",
+                "Ty jsi absolutní bůh Flappy Bird! 👑",
+                "Tohle je úroveň 'mám příliš mnoho volného času a umím ho využít'! 😂",
+                "Už jsi lepší než samotný Flappy Bird! 🐦🔥",
+                "Máš můj absolutní respekt, pane! 👑👑"
+            ]
+        };
+
+        let category;
+        if (score >= 1 && score <= 10) category = 'ultra-looser';
+        else if (score >= 11 && score <= 25) category = 'stale-looser';
+        else if (score >= 26 && score <= 50) category = 'stredni';
+        else if (score >= 51 && score <= 100) category = 'dobry';
+        else if (score >= 101 && score <= 200) category = 'vyborny';
+        else if (score >= 201 && score <= 299) category = 'mistr';
+        else if (score >= 300) category = 'fucking-legend';
+        else category = 'ultra-looser'; // Fallback pro skóre 0
+
+        const categoryMessages = messages[category];
+        const randomIndex = Math.floor(Math.random() * categoryMessages.length);
+        return categoryMessages[randomIndex];
+    }
 
 }
 
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     new FlappyBirdGame();
-}); 
+});

@@ -111,6 +111,15 @@ body {
     font-size: 1.5rem;
 }
 
+.score-message {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    text-align: center;
+    line-height: 1.4;
+    font-style: italic;
+}
+
 #player-name-input {
     width: 100%;
     padding: 15px;
