@@ -14,8 +14,17 @@ class FlappyBirdGame {
         };
         this.pipes = [];
         this.pipeWidth = 50;
-        this.pipeGap = 200;  // Zvětšil jsem mezeru mezi horní a dolní trubkou
-        this.pipeSpeed = 1.5; // Zpomalil jsem pohyb trubek
+        
+        // Systém postupné obtížnosti
+        this.basePipeGap = 200;      // Základní mezera mezi horní a dolní trubkou
+        this.basePipeSpeed = 1.5;    // Základní rychlost trubek
+        this.baseGapHeight = 150;    // Základní výška průchodu
+        
+        // Aktuální hodnoty (budou se měnit podle obtížnosti)
+        this.pipeGap = this.basePipeGap;
+        this.pipeSpeed = this.basePipeSpeed;
+        this.gapHeight = this.baseGapHeight;
+        
         this.lastPipeTime = 0;
         this.pipeInterval = 2500; // Zvětšil jsem interval mezi trubkami (ms)
         
@@ -139,7 +148,10 @@ class FlappyBirdGame {
         this.pipeCount = 0;
         this.lastPipeTime = 0;
         
-
+        // Reset obtížnosti na základní hodnoty
+        this.pipeGap = this.basePipeGap;
+        this.pipeSpeed = this.basePipeSpeed;
+        this.gapHeight = this.baseGapHeight;
         
         this.updateScore();
         document.getElementById('game-over').classList.add('hidden');
@@ -184,7 +196,8 @@ class FlappyBirdGame {
         
         // Create new pipes
         if (currentTime - this.lastPipeTime > this.pipeInterval) {
-            const gapY = Math.random() * (this.canvas.height - this.pipeGap - 100) + 50;
+            // Použijeme gapHeight pro výšku průchodu, ale pipeGap pro pozici bonusů
+            const gapY = Math.random() * (this.canvas.height - this.gapHeight - 100) + 50;
             this.pipes.push({
                 x: this.canvas.width,
                 gapY: gapY,
@@ -197,7 +210,7 @@ class FlappyBirdGame {
                 const bonusType = Math.floor(Math.random() * 3); // 0-2 pro ring, ceresne, lipstick
                 this.bonuses.push({
                     x: this.canvas.width + 100,
-                    y: gapY + this.pipeGap / 2 - 25,
+                    y: gapY + this.gapHeight / 2 - 25,
                     type: bonusType,
                     collected: false
                 });
@@ -207,13 +220,11 @@ class FlappyBirdGame {
             if (this.pipeCount % 10 === 0 && this.pipeCount > 0) {
                 this.bonuses.push({
                     x: this.canvas.width + 100,
-                    y: gapY + this.pipeGap / 2 - 25,
+                    y: gapY + this.gapHeight / 2 - 25,
                     type: 3, // flash
                     collected: false
                 });
             }
-            
-
             
             this.lastPipeTime = currentTime;
         }
@@ -290,7 +301,7 @@ class FlappyBirdGame {
         const pipeLeft = pipe.x;
         const pipeRight = pipe.x + this.pipeWidth;
         const pipeTop = pipe.gapY;
-        const pipeBottom = pipe.gapY + this.pipeGap;
+        const pipeBottom = pipe.gapY + this.gapHeight; // Použijeme gapHeight místo pipeGap
         
         // Check if bird is within pipe's x-range
         if (birdRight > pipeLeft && birdLeft < pipeRight) {
@@ -338,9 +349,24 @@ class FlappyBirdGame {
             if (this.score >= 20) level = 3;
             document.getElementById('level').textContent = `Úroveň ${level}`;
         }
+        
+        // Aktualizace obtížnosti podle skóre
+        this.updateDifficulty();
     }
     
-
+    updateDifficulty() {
+        // Rychlost trubek - každých 25 bodů +0.5px/frame, maximum 5px/frame
+        this.pipeSpeed = Math.min(5, this.basePipeSpeed + Math.floor(this.score / 25) * 0.5);
+        
+        // Mezera mezi trubkami - každých 40 bodů -10px, minimum 150px
+        this.pipeGap = Math.max(150, this.basePipeGap - Math.floor(this.score / 40) * 10);
+        
+        // Výška průchodu - každých 50 bodů -5px, minimum 130px
+        this.gapHeight = Math.max(130, this.baseGapHeight - Math.floor(this.score / 50) * 5);
+        
+        // Debug informace (můžeme později odstranit)
+        console.log(`Skóre: ${this.score}, Rychlost: ${this.pipeSpeed.toFixed(1)}, Mezera: ${this.pipeGap}, Průchod: ${this.gapHeight}`);
+    }
 
     async gameOver() {
         this.gameRunning = false;
@@ -442,12 +468,12 @@ class FlappyBirdGame {
             // Top pipe
             this.ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.gapY);
             // Bottom pipe
-            this.ctx.fillRect(pipe.x, pipe.gapY + this.pipeGap, this.pipeWidth, this.canvas.height - pipe.gapY - this.pipeGap);
+            this.ctx.fillRect(pipe.x, pipe.gapY + this.gapHeight, this.pipeWidth, this.canvas.height - pipe.gapY - this.gapHeight);
             
             // Pipe caps - tmavší odstín stejné barvy
             this.ctx.fillStyle = '#CC3E61';
             this.ctx.fillRect(pipe.x - 5, pipe.gapY - 20, this.pipeWidth + 10, 20);
-            this.ctx.fillRect(pipe.x - 5, pipe.gapY + this.pipeGap, this.pipeWidth + 10, 20);
+            this.ctx.fillRect(pipe.x - 5, pipe.gapY + this.gapHeight, this.pipeWidth + 10, 20);
             this.ctx.fillStyle = '#FF4D79';
         });
     }
