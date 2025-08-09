@@ -84,6 +84,60 @@ body {
     transform: translateY(0);
 }
 
+.btn-secondary {
+    background: linear-gradient(45deg, #6c757d, #495057);
+}
+
+/* Dialog pro zadání jména */
+#name-dialog {
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog-content {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    max-width: 350px;
+    width: 90%;
+}
+
+.dialog-content h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+#player-name-input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #667eea;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+#player-name-input:focus {
+    border-color: #764ba2;
+}
+
+.dialog-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.dialog-buttons .btn {
+    min-width: 120px;
+    margin: 0;
+}
+
 #game-screen {
     justify-content: flex-start;
     padding: 0;

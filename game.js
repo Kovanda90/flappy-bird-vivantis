@@ -161,13 +161,13 @@ class FlappyBirdGame {
         }
     }
 
-    updateBird() {
+    async updateBird() {
         this.bird.velocity += this.bird.gravity;
         this.bird.y += this.bird.velocity;
         
         // Ground collision
         if (this.bird.y + this.bird.size > this.canvas.height) {
-            this.gameOver();
+            await this.gameOver();
         }
         
         // Ceiling collision
@@ -177,7 +177,7 @@ class FlappyBirdGame {
         }
     }
 
-    updatePipes() {
+    async updatePipes() {
         const currentTime = Date.now();
         
 
@@ -239,7 +239,7 @@ class FlappyBirdGame {
                     // Označíme tubus jako již zpracovaný, aby se život nespotřeboval znovu
                     pipe.collisionHandled = true;
                 } else {
-                    this.gameOver();
+                    await this.gameOver();
                     return;
                 }
             }
@@ -342,11 +342,11 @@ class FlappyBirdGame {
     
 
 
-    gameOver() {
+    async gameOver() {
         this.gameRunning = false;
         document.getElementById('final-score').textContent = this.score;
         document.getElementById('game-over').classList.remove('hidden');
-        this.saveScore();
+        await this.saveScore();
         
         // Hudba pokračuje i po konci hry - necháme ji hrát
     }
@@ -505,11 +505,11 @@ class FlappyBirdGame {
 
 
 
-    gameLoop() {
+    async gameLoop() {
         if (!this.gameRunning) return;
         
-        this.updateBird();
-        this.updatePipes();
+        await this.updateBird();
+        await this.updatePipes();
 
         this.draw();
         
@@ -546,14 +546,67 @@ class FlappyBirdGame {
     }
 
     async saveScore() {
-        const playerName = prompt('Zadejte své jméno:') || 'Anonym';
-        const newScore = {
-            name: playerName,
-            score: this.score,
-            date: new Date().toLocaleDateString('cs-CZ')
+        // Zobrazí vlastní dialog pro zadání jména
+        return new Promise((resolve) => {
+            this.showNameDialog((playerName) => {
+                const name = playerName || 'Anonym';
+                const newScore = {
+                    name: name,
+                    score: this.score,
+                    date: new Date().toLocaleDateString('cs-CZ')
+                };
+                
+                // Uložení do Firebase
+                this.saveToFirebase(name).then(() => {
+                    // Fallback na lokální úložiště
+                    this.leaderboard.push(newScore);
+                    this.leaderboard.sort((a, b) => b.score - a.score);
+                    this.leaderboard = this.leaderboard.slice(0, 10);
+                    localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
+                    resolve();
+                });
+            });
+        });
+    }
+
+    showNameDialog(callback) {
+        const nameDialog = document.getElementById('name-dialog');
+        const nameInput = document.getElementById('player-name-input');
+        const saveBtn = document.getElementById('save-name-btn');
+        const cancelBtn = document.getElementById('cancel-name-btn');
+
+        // Zobrazí dialog
+        this.showScreen('name-dialog');
+        nameInput.focus();
+        nameInput.value = '';
+
+        // Event listenery
+        const handleSave = () => {
+            const name = nameInput.value.trim();
+            this.showScreen('game-screen');
+            callback(name);
         };
-        
-        // Uložení do Firebase
+
+        const handleCancel = () => {
+            this.showScreen('game-screen');
+            callback('Anonym');
+        };
+
+        const handleKeyPress = (e) => {
+            if (e.key === 'Enter') {
+                handleSave();
+            } else if (e.key === 'Escape') {
+                handleCancel();
+            }
+        };
+
+        // Přidá event listenery
+        saveBtn.addEventListener('click', handleSave, { once: true });
+        cancelBtn.addEventListener('click', handleCancel, { once: true });
+        nameInput.addEventListener('keydown', handleKeyPress, { once: true });
+    }
+
+    async saveToFirebase(playerName) {
         try {
             if (window.db) {
                 await window.db.collection('scores').add({
@@ -566,12 +619,6 @@ class FlappyBirdGame {
         } catch (error) {
             console.error('Chyba při ukládání do Firebase:', error);
         }
-        
-        // Fallback na lokální úložiště
-        this.leaderboard.push(newScore);
-        this.leaderboard.sort((a, b) => b.score - a.score);
-        this.leaderboard = this.leaderboard.slice(0, 10);
-        localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
     }
 
     async updateLeaderboard() {
