@@ -550,15 +550,20 @@ class FlappyBirdGame {
         return new Promise((resolve) => {
             this.showNameDialog((playerName) => {
                 const name = playerName || 'Anonym';
-                const newScore = {
-                    name: name,
-                    score: this.score,
-                    date: new Date().toLocaleDateString('cs-CZ')
-                };
                 
                 // Uložení do Firebase
                 this.saveToFirebase(name).then(() => {
-                    // Fallback na lokální úložiště
+                    // Po úspěšném uložení do Firebase načteme aktuální žebříček
+                    this.loadLeaderboard().then(() => {
+                        resolve();
+                    });
+                }).catch(() => {
+                    // Fallback na lokální úložiště pouze pokud Firebase selže
+                    const newScore = {
+                        name: name,
+                        score: this.score,
+                        date: new Date().toLocaleDateString('cs-CZ')
+                    };
                     this.leaderboard.push(newScore);
                     this.leaderboard.sort((a, b) => b.score - a.score);
                     this.leaderboard = this.leaderboard.slice(0, 10);
