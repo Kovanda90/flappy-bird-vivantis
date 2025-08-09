@@ -18,7 +18,7 @@ class FlappyBirdGame {
         // Systém postupné obtížnosti - začínáme velmi pohodově
         this.basePipeSpeed = 1.0;    // Základní rychlost trubek - začínáme pomaleji
         this.baseGapHeight = 250;    // Základní výška průchodu - ještě větší na začátku
-        this.basePipeInterval = 2500; // Základní interval mezi trubkami - optimální start
+        this.basePipeInterval = 3500; // Základní interval mezi trubkami - větší startovní rozestupy
         
         // Aktuální hodnoty (budou se měnit podle obtížnosti)
         this.pipeSpeed = this.basePipeSpeed;
@@ -362,8 +362,8 @@ class FlappyBirdGame {
         // Výška průchodu - každých 50 bodů -3px, minimum 120px (plynulejší zmenšování)
         this.gapHeight = Math.max(120, this.baseGapHeight - (this.score / 50) * 3);
         
-        // Interval mezi trubkami - každých 15 bodů -50ms, minimum 1500ms (postupné přibližování)
-        this.pipeInterval = Math.max(1500, this.basePipeInterval - (this.score / 15) * 50);
+        // Interval mezi trubkami - zachováváme stejný rozestup 3500px při zvyšující se rychlosti
+        this.pipeInterval = Math.max(1500, 3500 / this.pipeSpeed);
         
         // Debug informace (můžeme později odstranit)
         console.log(`Skóre: ${this.score}, Rychlost: ${this.pipeSpeed.toFixed(2)}, Průchod: ${this.gapHeight.toFixed(1)}, Interval: ${this.pipeInterval.toFixed(0)}ms`);
