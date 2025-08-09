@@ -547,15 +547,25 @@ class FlappyBirdGame {
     // Funkce pro odstranění duplikátů ze žebříčku
     removeDuplicates() {
         const seen = new Set();
+        const originalLength = this.leaderboard.length;
+        const removedEntries = [];
+        
         this.leaderboard = this.leaderboard.filter(entry => {
             const key = `${entry.name}-${entry.score}`;
             if (seen.has(key)) {
+                removedEntries.push(entry);
+                console.log('Odstraňuji duplikát:', entry.name, entry.score, 'klíč:', key);
                 return false;
             }
             seen.add(key);
             return true;
         });
+        
         console.log('Duplikáty odstraněny, zbývá:', this.leaderboard.length, 'záznamů');
+        console.log('Odstraněno:', removedEntries.length, 'duplikátů');
+        if (removedEntries.length > 0) {
+            console.log('Odstraněné záznamy:', removedEntries);
+        }
     }
 
     async loadLeaderboard() {
