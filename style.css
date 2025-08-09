@@ -205,7 +205,7 @@ body {
 #leaderboard-screen h2,
 #about-screen h2 {
     color: #333;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     font-size: 2rem;
     flex-shrink: 0; /* Zabrání zmenšení nadpisu */
 }
@@ -215,7 +215,7 @@ body {
     width: 100%;
     overflow-y: auto;
     margin-bottom: 20px;
-    max-height: calc(100vh - 200px); /* Zvětšeno pro zobrazení všech 10 záznamů */
+    max-height: calc(100vh - 180px); /* Zvětšeno pro zobrazení všech 10 záznamů */
 }
 
 #leaderboard-screen .btn {
@@ -226,8 +226,8 @@ body {
 
 .leaderboard-item {
     background: rgba(255, 255, 255, 0.8);
-    margin: 10px 0;
-    padding: 15px;
+    margin: 8px 0;
+    padding: 12px;
     border-radius: 10px;
     display: flex;
     justify-content: space-between;
@@ -339,7 +339,7 @@ body {
     }
     
     #leaderboard-list {
-        max-height: calc(100vh - 250px); /* Zvětšeno pro zobrazení všech 10 záznamů na mobilu */
+        max-height: calc(100vh - 220px); /* Zvětšeno pro zobrazení všech 10 záznamů na mobilu */
         margin-bottom: 15px;
     }
     
