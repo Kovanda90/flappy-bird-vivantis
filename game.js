@@ -39,7 +39,7 @@ class FlappyBirdGame {
         
         // Načtení obrázků oblohy
         this.skyImages = [];
-        this.skyImageNames = ['pozadi_nove.jpg', 'mrak1 1.png', 'mrak2 1.png', 'mrak3 1.png'];
+        this.skyImageNames = ['obloha.jpg', 'mrak1.png', 'mrak2.png', 'mrak3.png'];
         
         this.skyImageNames.forEach((imageName, index) => {
             const img = new Image();
