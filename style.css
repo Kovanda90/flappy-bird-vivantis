@@ -215,7 +215,7 @@ body {
     width: 100%;
     overflow-y: auto;
     margin-bottom: 20px;
-    max-height: calc(100vh - 250px); /* Větší rezerva pro tlačítko */
+    max-height: calc(100vh - 200px); /* Zvětšeno pro zobrazení všech 10 záznamů */
 }
 
 #leaderboard-screen .btn {
@@ -339,13 +339,13 @@ body {
     }
     
     #leaderboard-list {
-        max-height: calc(100vh - 300px); /* Větší rezerva na mobilních zařízeních */
+        max-height: calc(100vh - 250px); /* Zvětšeno pro zobrazení všech 10 záznamů na mobilu */
         margin-bottom: 15px;
     }
     
     .leaderboard-item {
-        padding: 12px;
-        margin: 8px 0;
+        padding: 10px;
+        margin: 6px 0;
     }
     
     .leaderboard-item .rank {
