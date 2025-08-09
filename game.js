@@ -561,10 +561,10 @@ class FlappyBirdGame {
     async loadLeaderboard() {
         try {
             if (window.db) {
-                // Firebase je dostupné - načteme pouze z Firebase
+                // Firebase je dostupné - načteme více záznamů pro případ duplikátů
                 const snapshot = await window.db.collection('scores')
                     .orderBy('score', 'desc')
-                    .limit(10)
+                    .limit(20) // Načteme 20 záznamů místo 10
                     .get();
                 
                 this.leaderboard = [];
@@ -584,12 +584,18 @@ class FlappyBirdGame {
                 console.log('Žebříček načten z localStorage:', this.leaderboard.length, 'záznamů');
             }
             
+            console.log('Před odstraněním duplikátů:', this.leaderboard.length, 'záznamů');
+            
+            // Odstraníme duplikáty
+            this.removeDuplicates();
+            
+            console.log('Po odstranění duplikátů:', this.leaderboard.length, 'záznamů');
+            
             // Seřadíme a omezíme na top 10
             this.leaderboard.sort((a, b) => b.score - a.score);
             this.leaderboard = this.leaderboard.slice(0, 10);
             
-            // Odstraníme duplikáty až po omezení na 10
-            this.removeDuplicates();
+            console.log('Finální žebříček:', this.leaderboard.length, 'záznamů');
             
         } catch (error) {
             console.error('Chyba při načítání žebříčku:', error);
@@ -598,11 +604,9 @@ class FlappyBirdGame {
             console.log('Fallback na localStorage:', this.leaderboard.length, 'záznamů');
             
             // I zde odstraníme duplikáty
+            this.removeDuplicates();
             this.leaderboard.sort((a, b) => b.score - a.score);
             this.leaderboard = this.leaderboard.slice(0, 10);
-            
-            // Odstraníme duplikáty až po omezení na 10
-            this.removeDuplicates();
         }
     }
 
