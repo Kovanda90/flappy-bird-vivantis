@@ -544,10 +544,24 @@ class FlappyBirdGame {
         requestAnimationFrame(() => this.gameLoop());
     }
 
-    // Firebase Leaderboard functionality
+    // Funkce pro odstranění duplikátů ze žebříčku
+    removeDuplicates() {
+        const seen = new Set();
+        this.leaderboard = this.leaderboard.filter(entry => {
+            const key = `${entry.name}-${entry.score}`;
+            if (seen.has(key)) {
+                return false;
+            }
+            seen.add(key);
+            return true;
+        });
+        console.log('Duplikáty odstraněny, zbývá:', this.leaderboard.length, 'záznamů');
+    }
+
     async loadLeaderboard() {
         try {
             if (window.db) {
+                // Firebase je dostupné - načteme pouze z Firebase
                 const snapshot = await window.db.collection('scores')
                     .orderBy('score', 'desc')
                     .limit(10)
@@ -562,14 +576,29 @@ class FlappyBirdGame {
                         date: data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString('cs-CZ') : 'Dnes'
                     });
                 });
+                console.log('Žebříček načten z Firebase:', this.leaderboard.length, 'záznamů');
             } else {
+                // Firebase není dostupné - načteme pouze z localStorage
                 console.log('Firebase není dostupné, používá se lokální žebříček');
                 this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+                console.log('Žebříček načten z localStorage:', this.leaderboard.length, 'záznamů');
             }
+            
+            // Odstraníme duplikáty a seřadíme
+            this.removeDuplicates();
+            this.leaderboard.sort((a, b) => b.score - a.score);
+            this.leaderboard = this.leaderboard.slice(0, 10);
+            
         } catch (error) {
             console.error('Chyba při načítání žebříčku:', error);
             // Fallback na lokální žebříček
             this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+            console.log('Fallback na localStorage:', this.leaderboard.length, 'záznamů');
+            
+            // I zde odstraníme duplikáty
+            this.removeDuplicates();
+            this.leaderboard.sort((a, b) => b.score - a.score);
+            this.leaderboard = this.leaderboard.slice(0, 10);
         }
     }
 
@@ -585,16 +614,26 @@ class FlappyBirdGame {
                     this.loadLeaderboard().then(() => {
                         resolve();
                     });
-                }).catch(() => {
+                }).catch((error) => {
+                    console.log('Firebase selhal, ukládám lokálně:', error);
                     // Fallback na lokální úložiště pouze pokud Firebase selže
                     const newScore = {
                         name: name,
                         score: this.score,
                         date: new Date().toLocaleDateString('cs-CZ')
                     };
+                    
+                    // Načteme aktuální lokální žebříček
+                    this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+                    
+                    // Přidáme nové skóre
                     this.leaderboard.push(newScore);
+                    
+                    // Seřadíme a omezíme na top 10
                     this.leaderboard.sort((a, b) => b.score - a.score);
                     this.leaderboard = this.leaderboard.slice(0, 10);
+                    
+                    // Uložíme do localStorage
                     localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
                     resolve();
                 });
