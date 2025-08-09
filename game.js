@@ -362,11 +362,12 @@ class FlappyBirdGame {
         // Výška průchodu - každých 50 bodů -3px, minimum 120px (plynulejší zmenšování)
         this.gapHeight = Math.max(120, this.baseGapHeight - (this.score / 50) * 3);
         
-        // Interval mezi trubkami - každých 15 bodů -10% rozestupu, minimum 2000px
-        this.pipeInterval = Math.max(1500, (3500 * Math.pow(0.90, this.score / 15)) / this.pipeSpeed);
+        // Interval mezi trubkami - každých 15 bodů -10% rozestupu, minimum 800ms pro zachování hratelnosti
+        this.pipeInterval = Math.max(800, (3500 * Math.pow(0.90, this.score / 15)) / this.pipeSpeed);
         
-        // Debug informace (můžeme později odstranit)
-        console.log(`Skóre: ${this.score}, Rychlost: ${this.pipeSpeed.toFixed(2)}, Průchod: ${this.gapHeight.toFixed(1)}, Interval: ${this.pipeInterval.toFixed(0)}ms`);
+        // Debug informace s detailními informacemi o rozestupech
+        const actualDistance = this.pipeInterval * this.pipeSpeed;
+        console.log(`Skóre: ${this.score}, Rychlost: ${this.pipeSpeed.toFixed(2)}px/frame, Průchod: ${this.gapHeight.toFixed(1)}px, Interval: ${this.pipeInterval.toFixed(0)}ms, Skutečná vzdálenost: ${actualDistance.toFixed(0)}px`);
     }
 
     async gameOver() {
