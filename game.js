@@ -15,18 +15,17 @@ class FlappyBirdGame {
         this.pipes = [];
         this.pipeWidth = 50;
         
-        // Systém postupné obtížnosti
-        this.basePipeGap = 200;      // Základní mezera mezi horní a dolní trubkou
-        this.basePipeSpeed = 1.5;    // Základní rychlost trubek
-        this.baseGapHeight = 150;    // Základní výška průchodu
+        // Systém postupné obtížnosti - začínáme velmi pohodově
+        this.basePipeSpeed = 1.0;    // Základní rychlost trubek - začínáme pomaleji
+        this.baseGapHeight = 250;    // Základní výška průchodu - ještě větší na začátku
+        this.basePipeInterval = 4500; // Základní interval mezi trubkami - ještě větší rozestupy
         
         // Aktuální hodnoty (budou se měnit podle obtížnosti)
-        this.pipeGap = this.basePipeGap;
         this.pipeSpeed = this.basePipeSpeed;
         this.gapHeight = this.baseGapHeight;
         
         this.lastPipeTime = 0;
-        this.pipeInterval = 2500; // Zvětšil jsem interval mezi trubkami (ms)
+        this.pipeInterval = this.basePipeInterval; // Začínáme s většími rozestupy
         
         // Bonusové předměty
         this.bonuses = [];
@@ -149,9 +148,9 @@ class FlappyBirdGame {
         this.lastPipeTime = 0;
         
         // Reset obtížnosti na základní hodnoty
-        this.pipeGap = this.basePipeGap;
         this.pipeSpeed = this.basePipeSpeed;
         this.gapHeight = this.baseGapHeight;
+        this.pipeInterval = this.basePipeInterval;
         
         this.updateScore();
         document.getElementById('game-over').classList.add('hidden');
@@ -355,17 +354,19 @@ class FlappyBirdGame {
     }
     
     updateDifficulty() {
-        // Rychlost trubek - každých 25 bodů +0.5px/frame, maximum 5px/frame
-        this.pipeSpeed = Math.min(5, this.basePipeSpeed + Math.floor(this.score / 25) * 0.5);
+        // Rychlost trubek - každých 5 bodů +0.1px/frame, maximum 4px/frame (častější a jemnější nárůst)
+        this.pipeSpeed = Math.min(4, this.basePipeSpeed + (this.score / 5) * 0.1);
         
-        // Mezera mezi trubkami - každých 40 bodů -10px, minimum 150px
-        this.pipeGap = Math.max(150, this.basePipeGap - Math.floor(this.score / 40) * 10);
+
         
-        // Výška průchodu - každých 50 bodů -5px, minimum 130px
-        this.gapHeight = Math.max(130, this.baseGapHeight - Math.floor(this.score / 50) * 5);
+        // Výška průchodu - každých 75 bodů -3px, minimum 120px (jemnější zmenšování)
+        this.gapHeight = Math.max(120, this.baseGapHeight - (this.score / 75) * 3);
+        
+        // Interval mezi trubkami - každých 100 bodů -100ms, minimum 2500ms (pomalejší zmenšování)
+        this.pipeInterval = Math.max(2500, this.basePipeInterval - (this.score / 100) * 100);
         
         // Debug informace (můžeme později odstranit)
-        console.log(`Skóre: ${this.score}, Rychlost: ${this.pipeSpeed.toFixed(1)}, Mezera: ${this.pipeGap}, Průchod: ${this.gapHeight}`);
+        console.log(`Skóre: ${this.score}, Rychlost: ${this.pipeSpeed.toFixed(2)}, Průchod: ${this.gapHeight.toFixed(1)}, Interval: ${this.pipeInterval.toFixed(0)}ms`);
     }
 
     async gameOver() {
