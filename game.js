@@ -178,11 +178,13 @@ class FlappyBirdGame {
         
         // Ground collision
         if (this.bird.y + this.bird.size > this.canvas.height) {
+            this.playCrashSound();
             await this.gameOver();
         }
         
         // Ceiling collision
         if (this.bird.y < 0) {
+            this.playCrashSound();
             this.bird.y = 0;
             this.bird.velocity = 0;
         }
@@ -241,6 +243,9 @@ class FlappyBirdGame {
             
             // Check collision (pouze pokud ještě nebyla zpracována)
             if (!pipe.collisionHandled && this.checkCollision(pipe)) {
+                // Přehráme crash zvuk při kolizi
+                this.playCrashSound();
+                
                 // Pokud má hráč extra život, spotřebuje ho a pokračuje
                 if (this.extraLives > 0) {
                     this.extraLives--;
@@ -278,6 +283,10 @@ class FlappyBirdGame {
             // Check collision with bonus
             if (!bonus.collected && this.checkBonusCollision(bonus)) {
                 bonus.collected = true;
+                
+                // Přehráme pop zvuk při sesbírání bonusu
+                this.playPopSound();
+                
                 if (bonus.type === 3) { // flash
                     this.extraLives++;
                 } else { // ring, ceresne, lipstick
@@ -761,6 +770,26 @@ class FlappyBirdGame {
         if (this.backgroundMusic) {
             this.musicVolume = volume;
             this.backgroundMusic.volume = volume;
+        }
+    }
+
+    playCrashSound() {
+        const crashSound = document.getElementById('crash-sound');
+        if (crashSound) {
+            crashSound.currentTime = 0; // Reset na začátek
+            crashSound.play().catch(e => {
+                console.log('Crash zvuk se nepřehrál:', e);
+            });
+        }
+    }
+
+    playPopSound() {
+        const popSound = document.getElementById('pop-sound');
+        if (popSound) {
+            popSound.currentTime = 0; // Reset na začátek
+            popSound.play().catch(e => {
+                console.log('Pop zvuk se nepřehrál:', e);
+            });
         }
     }
     
