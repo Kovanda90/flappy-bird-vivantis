@@ -369,25 +369,25 @@ body {
         font-size: 1rem;
     }
     
-    /* Jemná úprava pozice skóre na mobilu - VERZE 2 */
+    /* Jemná úprava pozice skóre na mobilu - VERZE 3 */
     #game-info {
-        top: 50px !important; /* Jen malá rezerva pod horní lištou */
+        top: 35px !important; /* Ještě výš, jen malá rezerva */
     }
     
     #game-info span {
-        font-size: 1.3rem !important; /* Jen trochu větší písmo */
+        font-size: 1.2rem !important; /* Původní velikost písma */
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6) !important; /* Silnější stín pro čitelnost */
     }
 }
 
-/* Speciální pravidla pro velmi malé obrazovky - VERZE 2 */
+/* Speciální pravidla pro velmi malé obrazovky - VERZE 3 */
 @media (max-width: 360px) {
     #game-info {
-        top: 60px !important; /* Jen trochu více rezervy na malých telefonech */
+        top: 45px !important; /* Ještě výš na malých telefonech */
     }
     
     #game-info span {
-        font-size: 1.4rem !important; /* Jen trochu větší písmo */
+        font-size: 1.2rem !important; /* Původní velikost písma */
     }
 }
 
