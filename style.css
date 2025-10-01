@@ -154,14 +154,13 @@ body {
 
 #game-info {
     position: absolute;
-    top: 60px;
+    top: 20px;
     left: 20px;
     right: 20px;
     display: flex;
     justify-content: space-between;
-    z-index: 100; /* Vyšší z-index pro jistotu */
+    z-index: 10;
     color: white;
-    pointer-events: none; /* Aby nepřekáželo při hře */
 }
 
 
@@ -370,30 +369,25 @@ body {
         font-size: 1rem;
     }
     
-    /* Oprava pozice skóre na mobilu */
+    /* Jemná úprava pozice skóre na mobilu */
     #game-info {
-        top: 120px; /* Ještě výrazněji níže na mobilu */
-        padding-top: 20px; /* Dodatečná rezerva */
+        top: 50px; /* Jen malá rezerva pod horní lištou */
     }
     
     #game-info span {
-        font-size: 1.6rem; /* Ještě větší písmo na mobilu */
-        text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.8); /* Ještě silnější stín */
-        background: rgba(0, 0, 0, 0.3); /* Poloprůhledné pozadí pro lepší čitelnost */
-        padding: 8px 12px;
-        border-radius: 10px;
+        font-size: 1.3rem; /* Jen trochu větší písmo */
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6); /* Silnější stín pro čitelnost */
     }
 }
 
 /* Speciální pravidla pro velmi malé obrazovky */
 @media (max-width: 360px) {
     #game-info {
-        top: 140px; /* Ještě výrazněji níže na malých telefonech */
+        top: 60px; /* Jen trochu více rezervy na malých telefonech */
     }
     
     #game-info span {
-        font-size: 1.8rem; /* Ještě větší písmo */
-        padding: 10px 15px;
+        font-size: 1.4rem; /* Jen trochu větší písmo */
     }
 }
 
