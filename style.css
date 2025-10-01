@@ -154,7 +154,7 @@ body {
 
 #game-info {
     position: absolute;
-    top: 20px;
+    top: 60px;
     left: 20px;
     right: 20px;
     display: flex;
@@ -367,6 +367,16 @@ body {
     
     .leaderboard-item .score {
         font-size: 1rem;
+    }
+    
+    /* Oprava pozice skóre na mobilu */
+    #game-info {
+        top: 80px; /* Ještě níže na mobilu */
+    }
+    
+    #game-info span {
+        font-size: 1.4rem; /* Větší písmo na mobilu */
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7); /* Silnější stín */
     }
 }
 
