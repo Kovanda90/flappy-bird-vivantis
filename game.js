@@ -582,15 +582,21 @@ class FlappyBirdGame {
         try {
             // Vždy se pokusíme načíst z Firebase pro online soutěžení
             if (window.db) {
-                console.log('Načítám žebříček z Firebase pro online soutěžení...');
+                console.log('🔥 Načítám žebříček z Firebase pro online soutěžení...');
+                console.log('🔥 Firebase db objekt:', window.db);
+                
                 const snapshot = await window.db.collection('scores')
                     .orderBy('score', 'desc')
                     .limit(20) // Načteme 20 záznamů místo 10
                     .get();
                 
+                console.log('🔥 Firebase snapshot:', snapshot);
+                console.log('🔥 Počet dokumentů:', snapshot.size);
+                
                 this.leaderboard = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
+                    console.log('🔥 Dokument:', doc.id, data);
                     this.leaderboard.push({
                         name: data.playerName,
                         score: data.score,
@@ -614,6 +620,7 @@ class FlappyBirdGame {
             
         } catch (error) {
             console.error('❌ Chyba při načítání z Firebase:', error);
+            console.error('❌ Detaily chyby:', error.message, error.code);
             console.warn('⚠️ Používám lokální žebříček - NENÍ ONLINE SOUTĚŽENÍ!');
             
             // Pouze jako poslední možnost použijeme localStorage
@@ -750,22 +757,48 @@ class FlappyBirdGame {
     async saveToFirebase(playerName) {
         try {
             if (window.db) {
-                console.log('Pokus o uložení skóre do Firebase:', { playerName, score: this.score });
+                console.log('🔥 Pokus o uložení skóre do Firebase:', { playerName, score: this.score });
+                console.log('🔥 Firebase db objekt:', window.db);
+                console.log('🔥 Firebase app:', firebase.app());
+                
                 const docRef = await window.db.collection('scores').add({
                     playerName: playerName,
                     score: this.score,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log('Skóre úspěšně uloženo do Firebase s ID:', docRef.id);
+                
+                console.log('✅ Skóre úspěšně uloženo do Firebase s ID:', docRef.id);
+                console.log('✅ Dokument vytvořen:', docRef.path);
+                
+                // Ověříme, že se data skutečně uložila
+                const doc = await docRef.get();
+                console.log('✅ Ověření uložení:', doc.data());
+                
                 return true;
             } else {
-                console.error('Firebase není dostupné (window.db je null)');
+                console.error('❌ Firebase není dostupné (window.db je null)');
+                console.error('❌ Firebase objekt:', window.firebase);
                 return false;
             }
         } catch (error) {
-            console.error('Chyba při ukládání do Firebase:', error);
-            console.error('Detaily chyby:', error.message, error.code);
-            return false;
+            console.error('❌ Chyba při ukládání do Firebase:', error);
+            console.error('❌ Detaily chyby:', error.message, error.code);
+            console.error('❌ Stack trace:', error.stack);
+            
+            // Zkusíme jednodušší uložení bez serverTimestamp
+            try {
+                console.log('🔄 Zkouším uložení bez serverTimestamp...');
+                const docRef = await window.db.collection('scores').add({
+                    playerName: playerName,
+                    score: this.score,
+                    timestamp: new Date()
+                });
+                console.log('✅ Alternativní uložení úspěšné:', docRef.id);
+                return true;
+            } catch (error2) {
+                console.error('❌ Ani alternativní uložení nefunguje:', error2);
+                return false;
+            }
         }
     }
 
@@ -787,11 +820,6 @@ class FlappyBirdGame {
             return;
         }
         
-        // Přidáme hlavičku pro online žebříček
-        const header = document.createElement('div');
-        header.style.cssText = 'text-align: center; color: #4CAF50; font-weight: bold; padding: 10px; background: #e8f5e8; border-radius: 5px; margin-bottom: 10px;';
-        header.innerHTML = '🌐 ONLINE ŽEBŘÍČEK - SDÍLENÝ MEZI VŠEMI HRÁČI';
-        leaderboardList.appendChild(header);
         
         this.leaderboard.forEach((entry, index) => {
             const item = document.createElement('div');
