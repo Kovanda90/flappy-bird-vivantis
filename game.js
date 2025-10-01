@@ -70,6 +70,7 @@ class FlappyBirdGame {
         
         this.setupCanvas();
         this.setupEventListeners();
+        this.clearLocalStorage(); // Vymažeme staré lokální skóre pro čistý start
         this.loadLeaderboard();
         
         // Hudba
@@ -579,8 +580,9 @@ class FlappyBirdGame {
 
     async loadLeaderboard() {
         try {
+            // Vždy se pokusíme načíst z Firebase pro online soutěžení
             if (window.db) {
-                // Firebase je dostupné - načteme více záznamů pro případ duplikátů
+                console.log('Načítám žebříček z Firebase pro online soutěžení...');
                 const snapshot = await window.db.collection('scores')
                     .orderBy('score', 'desc')
                     .limit(20) // Načteme 20 záznamů místo 10
@@ -595,37 +597,60 @@ class FlappyBirdGame {
                         date: data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString('cs-CZ') : 'Dnes'
                     });
                 });
-                console.log('Žebříček načten z Firebase:', this.leaderboard.length, 'záznamů');
+                console.log('✅ Žebříček načten z Firebase (ONLINE):', this.leaderboard.length, 'záznamů');
+                
+                // Odstraníme duplikáty
+                this.removeDuplicates();
+                
+                // Seřadíme a omezíme na top 10
+                this.leaderboard.sort((a, b) => b.score - a.score);
+                this.leaderboard = this.leaderboard.slice(0, 10);
+                
+                console.log('✅ Finální ONLINE žebříček:', this.leaderboard.length, 'záznamů');
+                return;
             } else {
-                // Firebase není dostupné - načteme pouze z localStorage
-                console.log('Firebase není dostupné, používá se lokální žebříček');
-                this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
-                console.log('Žebříček načten z localStorage:', this.leaderboard.length, 'záznamů');
+                throw new Error('Firebase není dostupné (window.db je null)');
             }
             
-            console.log('Před odstraněním duplikátů:', this.leaderboard.length, 'záznamů');
+        } catch (error) {
+            console.error('❌ Chyba při načítání z Firebase:', error);
+            console.warn('⚠️ Používám lokální žebříček - NENÍ ONLINE SOUTĚŽENÍ!');
+            
+            // Pouze jako poslední možnost použijeme localStorage
+            this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+            console.log('📱 Žebříček načten z localStorage (LOKÁLNÍ):', this.leaderboard.length, 'záznamů');
             
             // Odstraníme duplikáty
             this.removeDuplicates();
-            
-            console.log('Po odstranění duplikátů:', this.leaderboard.length, 'záznamů');
-            
-            // Seřadíme a omezíme na top 10
             this.leaderboard.sort((a, b) => b.score - a.score);
             this.leaderboard = this.leaderboard.slice(0, 10);
             
-            console.log('Finální žebříček:', this.leaderboard.length, 'záznamů');
-            
-        } catch (error) {
-            console.error('Chyba při načítání žebříčku:', error);
-            // Fallback na lokální žebříček
-            this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
-            console.log('Fallback na localStorage:', this.leaderboard.length, 'záznamů');
-            
-            // I zde odstraníme duplikáty
-            this.removeDuplicates();
-            this.leaderboard.sort((a, b) => b.score - a.score);
-            this.leaderboard = this.leaderboard.slice(0, 10);
+            // Zobrazíme upozornění uživateli
+            this.showOfflineWarning();
+        }
+    }
+
+    showOfflineWarning() {
+        // Přidáme upozornění do žebříčku
+        const leaderboardList = document.getElementById('leaderboard-list');
+        if (leaderboardList && this.leaderboard.length === 0) {
+            leaderboardList.innerHTML = `
+                <div style="text-align: center; color: #ff6b6b; padding: 20px; background: #ffe0e0; border-radius: 10px; margin: 10px 0;">
+                    <h3>⚠️ Offline režim</h3>
+                    <p>Nelze se připojit k online databázi.</p>
+                    <p>Žebříček není sdílený mezi zařízeními.</p>
+                    <p>Zkontrolujte internetové připojení.</p>
+                </div>
+            `;
+        }
+    }
+
+    clearLocalStorage() {
+        // Vymažeme staré lokální skóre, aby se používala pouze Firebase databáze
+        const oldLeaderboard = localStorage.getItem('flappyBirdLeaderboard');
+        if (oldLeaderboard) {
+            console.log('🗑️ Mažu staré lokální skóre pro čistý online start');
+            localStorage.removeItem('flappyBirdLeaderboard');
         }
     }
 
@@ -745,16 +770,28 @@ class FlappyBirdGame {
     }
 
     async updateLeaderboard() {
-        // Načte aktuální žebříček z Firebase
+        // Načte aktuální žebříček z Firebase (vždy online)
         await this.loadLeaderboard();
         
         const leaderboardList = document.getElementById('leaderboard-list');
         leaderboardList.innerHTML = '';
         
         if (this.leaderboard.length === 0) {
-            leaderboardList.innerHTML = '<p style="text-align: center; color: #666;">Zatím žádné skóre</p>';
+            leaderboardList.innerHTML = `
+                <div style="text-align: center; color: #666; padding: 20px;">
+                    <h3>🏆 Online žebříček</h3>
+                    <p>Zatím žádné skóre v online databázi</p>
+                    <p>Buďte první, kdo dosáhne skóre!</p>
+                </div>
+            `;
             return;
         }
+        
+        // Přidáme hlavičku pro online žebříček
+        const header = document.createElement('div');
+        header.style.cssText = 'text-align: center; color: #4CAF50; font-weight: bold; padding: 10px; background: #e8f5e8; border-radius: 5px; margin-bottom: 10px;';
+        header.innerHTML = '🌐 ONLINE ŽEBŘÍČEK - SDÍLENÝ MEZI VŠEMI HRÁČI';
+        leaderboardList.appendChild(header);
         
         this.leaderboard.forEach((entry, index) => {
             const item = document.createElement('div');
