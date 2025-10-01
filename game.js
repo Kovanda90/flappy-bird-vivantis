@@ -636,32 +636,21 @@ class FlappyBirdGame {
                 const name = playerName || 'Anonym';
                 
                 // Uložení do Firebase
-                this.saveToFirebase(name).then(() => {
-                    // Po úspěšném uložení do Firebase načteme aktuální žebříček
-                    this.loadLeaderboard().then(() => {
+                this.saveToFirebase(name).then((success) => {
+                    if (success) {
+                        console.log('Firebase úspěšné, načítám žebříček...');
+                        // Po úspěšném uložení do Firebase načteme aktuální žebříček
+                        this.loadLeaderboard().then(() => {
+                            resolve();
+                        });
+                    } else {
+                        console.log('Firebase selhal, ukládám lokálně');
+                        this.saveToLocalStorage(name);
                         resolve();
-                    });
+                    }
                 }).catch((error) => {
-                    console.log('Firebase selhal, ukládám lokálně:', error);
-                    // Fallback na lokální úložiště pouze pokud Firebase selže
-                    const newScore = {
-                        name: name,
-                        score: this.score,
-                        date: new Date().toLocaleDateString('cs-CZ')
-                    };
-                    
-                    // Načteme aktuální lokální žebříček
-                    this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
-                    
-                    // Přidáme nové skóre
-                    this.leaderboard.push(newScore);
-                    
-                    // Seřadíme a omezíme na top 10
-                    this.leaderboard.sort((a, b) => b.score - a.score);
-                    this.leaderboard = this.leaderboard.slice(0, 10);
-                    
-                    // Uložíme do localStorage
-                    localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
+                    console.log('Firebase selhal s chybou, ukládám lokálně:', error);
+                    this.saveToLocalStorage(name);
                     resolve();
                 });
             });
@@ -711,18 +700,47 @@ class FlappyBirdGame {
         nameInput.addEventListener('keydown', handleKeyPress, { once: true });
     }
 
+    saveToLocalStorage(playerName) {
+        const newScore = {
+            name: playerName,
+            score: this.score,
+            date: new Date().toLocaleDateString('cs-CZ')
+        };
+        
+        // Načteme aktuální lokální žebříček
+        this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
+        
+        // Přidáme nové skóre
+        this.leaderboard.push(newScore);
+        
+        // Seřadíme a omezíme na top 10
+        this.leaderboard.sort((a, b) => b.score - a.score);
+        this.leaderboard = this.leaderboard.slice(0, 10);
+        
+        // Uložíme do localStorage
+        localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
+        console.log('Skóre uloženo do localStorage:', newScore);
+    }
+
     async saveToFirebase(playerName) {
         try {
             if (window.db) {
-                await window.db.collection('scores').add({
+                console.log('Pokus o uložení skóre do Firebase:', { playerName, score: this.score });
+                const docRef = await window.db.collection('scores').add({
                     playerName: playerName,
                     score: this.score,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log('Skóre uloženo do Firebase');
+                console.log('Skóre úspěšně uloženo do Firebase s ID:', docRef.id);
+                return true;
+            } else {
+                console.error('Firebase není dostupné (window.db je null)');
+                return false;
             }
         } catch (error) {
             console.error('Chyba při ukládání do Firebase:', error);
+            console.error('Detaily chyby:', error.message, error.code);
+            return false;
         }
     }
 
