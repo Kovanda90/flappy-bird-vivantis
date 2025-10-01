@@ -339,6 +339,7 @@ body {
     /* Oprava pro žebříček na mobilních zařízeních */
     #leaderboard-screen {
         padding: 15px;
+        padding-top: 60px; /* Větší rezerva pro horní lištu prohlížeče */
         padding-bottom: 80px; /* Rezerva pro tlačítko a lištu prohlížeče */
     }
     
@@ -348,8 +349,9 @@ body {
     }
     
     #leaderboard-list {
-        max-height: calc(100vh - 180px); /* Zvětšeno pro zobrazení všech 10 záznamů na mobilu */
+        max-height: calc(100vh - 250px); /* Větší rezerva pro horní lištu a tlačítko */
         margin-bottom: 15px;
+        padding-top: 10px; /* Dodatečná rezerva pro první řádek */
     }
     
     .leaderboard-item {
@@ -388,6 +390,16 @@ body {
     
     #game-info span {
         font-size: 1.2rem !important; /* Původní velikost písma */
+    }
+    
+    /* Oprava žebříčku na malých telefonech */
+    #leaderboard-screen {
+        padding-top: 80px !important; /* Ještě větší rezerva pro horní lištu */
+    }
+    
+    #leaderboard-list {
+        max-height: calc(100vh - 300px) !important; /* Větší rezerva */
+        padding-top: 15px !important; /* Větší rezerva pro první řádek */
     }
 }
 
