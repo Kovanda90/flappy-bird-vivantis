@@ -396,9 +396,79 @@ class FlappyBirdGame {
     async gameOver() {
         this.gameRunning = false;
         document.getElementById('final-score').textContent = this.score;
+        
+        // Zobraz zprávu podle skóre
+        const message = this.getGameOverMessage(this.score);
+        document.getElementById('game-over-message').textContent = message;
+        
         document.getElementById('game-over').classList.remove('hidden');
         
         // Hudba pokračuje i po konci hry - necháme ji hrát
+    }
+
+    getGameOverMessage(score) {
+        const messages = {
+            'ultra-looser': [
+                "Au. Ptáček dolítal a cestou na zem ho ještě sežrala kočka.",
+                "Ups, tohle se nepovedlo. Nevadí, trénuj na příště!",
+                "Jsi ze hry. Nevadí, i plameňák má občas špatný den.",
+                "Trénink dělá mistra. Tohle není ten případ."
+            ],
+            'trosku-looser': [
+                "Už ti to jde! (Ale stejně po večerech trénuj)",
+                "Zlepšuješ se! Pořád máš ale level ptáček v porcelánu ⭐",
+                "Ptáček dolítal. Příště se snaž víc!",
+                "Zas taková tragédie to nebyla. Fakt."
+            ],
+            'slusny': [
+                "Tohle nebylo vůbec špatné!",
+                "Máš to pod kontrolou! Občas. 🎮",
+                "Už jsi skoro profík. Skoro!",
+                "Máš talent! Snaž se a budeš gamer Vivantisu! ⚡"
+            ],
+            'dobry': [
+                "Yes! Tohle se ti fakt povedlo!",
+                "Trénuj a budeš neporazitelný/á! 👏",
+                "Už jsi skoro gamer Vivantisu. Skoro! 🏆",
+                "Boss level unlocked⭐"
+            ],
+            'vyborny': [
+                "Legendární výkon! 🎉",
+                "Skvělé! (Tady měl někdo čas trénovat) 👏",
+                "Už jsi lepší než průměrný Flappy Bird! 🐦",
+                "Ptáček dolítal. Ale dolítal šťastně! 🎉",
+                "Pecka! Trénuj a dotáhneš do daleko👑"
+            ],
+            'mistr': [
+                "Yes! Jsi gamer Vivantisu! 🏆",
+                "Jsi oficiálně neporazitelný/ná 🎯",
+                "Respekt! Max level unlocked⭐",
+                "Master level unlocked 👑",
+                "WOW! Zdravíme nového gamera Vivantisu👑",
+                "Dosáhl/a jsi levelu mistr a můžeš trénovat ostatní ⚡"
+            ],
+            'absolut-legend': [
+                "Jsi oficiálně prohlášen/a za boha Flappy Bird 👏👏🎉",
+                "Nemáme slov! Tohle nebude tvoje první hra, že? 👑",
+                "Neuvěřitelné! Jsi lepší než samotný Flappy Bird 😂",
+                "Heroic výkon, ze kterého by spadla brada i Herculovi🐦🔥",
+                "Získal/a jsi absolutní respekt Flappy Bird! 👑"
+            ]
+        };
+
+        let category;
+        if (score >= 1 && score <= 10) category = 'ultra-looser';
+        else if (score >= 11 && score <= 25) category = 'trosku-looser';
+        else if (score >= 26 && score <= 50) category = 'slusny';
+        else if (score >= 51 && score <= 100) category = 'dobry';
+        else if (score >= 101 && score <= 200) category = 'vyborny';
+        else if (score >= 201 && score <= 299) category = 'mistr';
+        else if (score >= 300) category = 'absolut-legend';
+        else category = 'ultra-looser'; // Fallback pro skóre 0
+
+        const categoryMessages = messages[category];
+        const randomIndex = Math.floor(Math.random() * categoryMessages.length);
+        return categoryMessages[randomIndex];
     }
 
     draw() {
