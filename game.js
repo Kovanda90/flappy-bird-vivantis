@@ -102,6 +102,13 @@ class FlappyBirdGame {
             e.preventDefault();
             this.jump();
         });
+        // Zabrání scrollování a zoomování při dotyku na canvas (mobil)
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        });
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+        });
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
