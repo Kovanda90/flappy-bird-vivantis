@@ -408,13 +408,13 @@ class FlappyBirdGame {
 
     getGameOverMessage(score) {
         const messages = {
-            'ultra-looser': [
+            'ultra-loser': [
                 "Au. Ptáček dolítal a cestou na zem ho ještě sežrala kočka.",
                 "Ups, tohle se nepovedlo. Nevadí, trénuj na příště!",
                 "Jsi ze hry. Nevadí, i plameňák má občas špatný den.",
                 "Trénink dělá mistra. Tohle není ten případ."
             ],
-            'trosku-looser': [
+            'trosku-loser': [
                 "Už ti to jde! (Ale stejně po večerech trénuj)",
                 "Zlepšuješ se! Pořád máš ale level ptáček v porcelánu ⭐",
                 "Ptáček dolítal. Příště se snaž víc!",
@@ -457,14 +457,14 @@ class FlappyBirdGame {
         };
 
         let category;
-        if (score >= 1 && score <= 10) category = 'ultra-looser';
-        else if (score >= 11 && score <= 25) category = 'trosku-looser';
+        if (score >= 0 && score <= 10) category = 'ultra-loser';
+        else if (score >= 11 && score <= 25) category = 'trosku-loser';
         else if (score >= 26 && score <= 50) category = 'slusny';
         else if (score >= 51 && score <= 100) category = 'dobry';
         else if (score >= 101 && score <= 200) category = 'vyborny';
         else if (score >= 201 && score <= 299) category = 'mistr';
         else if (score >= 300) category = 'absolut-legend';
-        else category = 'ultra-looser'; // Fallback pro skóre 0
+        else category = 'ultra-loser'; // Fallback pro skóre 0
 
         const categoryMessages = messages[category];
         const randomIndex = Math.floor(Math.random() * categoryMessages.length);
