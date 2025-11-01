@@ -88,10 +88,12 @@ class FlappyBirdGame {
         // Menu navigation
         document.getElementById('start-btn').addEventListener('click', () => this.startGame());
         document.getElementById('avatar-btn').addEventListener('click', () => this.showScreen('avatar-screen'));
+        document.getElementById('about-btn').addEventListener('click', () => this.showScreen('about-screen'));
         
         // Game controls
         document.getElementById('restart-btn').addEventListener('click', () => this.restartGame());
         document.getElementById('menu-btn').addEventListener('click', () => this.showScreen('menu'));
+        document.getElementById('about-back-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('avatar-back-btn').addEventListener('click', () => this.showScreen('menu'));
         
         // Poznámka: back-btn pro leaderboard byl odstraněn, protože žebříček už neexistuje
