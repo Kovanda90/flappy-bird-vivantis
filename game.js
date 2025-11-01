@@ -70,8 +70,6 @@ class FlappyBirdGame {
         
         this.setupCanvas();
         this.setupEventListeners();
-        this.clearLocalStorage(); // Vymažeme staré lokální skóre pro čistý start
-        this.loadLeaderboard();
         
         // Hudba
         this.backgroundMusic = document.getElementById('background-music');
@@ -89,15 +87,15 @@ class FlappyBirdGame {
         // Menu navigation
         document.getElementById('start-btn').addEventListener('click', () => this.startGame());
         document.getElementById('avatar-btn').addEventListener('click', () => this.showScreen('avatar-screen'));
-        document.getElementById('leaderboard-btn').addEventListener('click', () => this.showScreen('leaderboard-screen'));
         document.getElementById('about-btn').addEventListener('click', () => this.showScreen('about-screen'));
         
         // Game controls
         document.getElementById('restart-btn').addEventListener('click', () => this.restartGame());
         document.getElementById('menu-btn').addEventListener('click', () => this.showScreen('menu'));
-        document.getElementById('back-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('about-back-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('avatar-back-btn').addEventListener('click', () => this.showScreen('menu'));
+        
+        // Poznámka: back-btn pro leaderboard byl odstraněn, protože žebříček už neexistuje
         
         // Touch and keyboard controls
         this.canvas.addEventListener('click', () => this.jump());
@@ -118,10 +116,6 @@ class FlappyBirdGame {
             screen.classList.remove('active');
         });
         document.getElementById(screenId).classList.add('active');
-        
-        if (screenId === 'leaderboard-screen') {
-            this.updateLeaderboard();
-        }
         
         if (screenId === 'avatar-screen') {
             this.setupAvatarSelection();
@@ -384,7 +378,6 @@ class FlappyBirdGame {
         this.gameRunning = false;
         document.getElementById('final-score').textContent = this.score;
         document.getElementById('game-over').classList.remove('hidden');
-        await this.saveScore();
         
         // Hudba pokračuje i po konci hry - necháme ji hrát
     }
@@ -554,285 +547,6 @@ class FlappyBirdGame {
         requestAnimationFrame(() => this.gameLoop());
     }
 
-    // Funkce pro odstranění duplikátů ze žebříčku
-    removeDuplicates() {
-        const seen = new Set();
-        const originalLength = this.leaderboard.length;
-        const removedEntries = [];
-        
-        this.leaderboard = this.leaderboard.filter(entry => {
-            const key = `${entry.name}-${entry.score}`;
-            if (seen.has(key)) {
-                removedEntries.push(entry);
-                console.log('Odstraňuji duplikát:', entry.name, entry.score, 'klíč:', key);
-                return false;
-            }
-            seen.add(key);
-            return true;
-        });
-        
-        console.log('Duplikáty odstraněny, zbývá:', this.leaderboard.length, 'záznamů');
-        console.log('Odstraněno:', removedEntries.length, 'duplikátů');
-        if (removedEntries.length > 0) {
-            console.log('Odstraněné záznamy:', removedEntries);
-        }
-    }
-
-    async loadLeaderboard() {
-        try {
-            // Vždy se pokusíme načíst z Firebase pro online soutěžení
-            if (window.db) {
-                console.log('🔥 Načítám žebříček z Firebase pro online soutěžení...');
-                console.log('🔥 Firebase db objekt:', window.db);
-                
-                const snapshot = await window.db.collection('scores')
-                    .orderBy('score', 'desc')
-                    .limit(20) // Načteme 20 záznamů místo 10
-                    .get();
-                
-                console.log('🔥 Firebase snapshot:', snapshot);
-                console.log('🔥 Počet dokumentů:', snapshot.size);
-                
-                this.leaderboard = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    console.log('🔥 Dokument:', doc.id, data);
-                    this.leaderboard.push({
-                        name: data.playerName,
-                        score: data.score,
-                        date: data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString('cs-CZ') : 'Dnes'
-                    });
-                });
-                console.log('✅ Žebříček načten z Firebase (ONLINE):', this.leaderboard.length, 'záznamů');
-                
-                // Odstraníme duplikáty
-                this.removeDuplicates();
-                
-                // Seřadíme a omezíme na top 10
-                this.leaderboard.sort((a, b) => b.score - a.score);
-                this.leaderboard = this.leaderboard.slice(0, 10);
-                
-                console.log('✅ Finální ONLINE žebříček:', this.leaderboard.length, 'záznamů');
-                return;
-            } else {
-                throw new Error('Firebase není dostupné (window.db je null)');
-            }
-            
-        } catch (error) {
-            console.error('❌ Chyba při načítání z Firebase:', error);
-            console.error('❌ Detaily chyby:', error.message, error.code);
-            console.warn('⚠️ Používám lokální žebříček - NENÍ ONLINE SOUTĚŽENÍ!');
-            
-            // Pouze jako poslední možnost použijeme localStorage
-            this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
-            console.log('📱 Žebříček načten z localStorage (LOKÁLNÍ):', this.leaderboard.length, 'záznamů');
-            
-            // Odstraníme duplikáty
-            this.removeDuplicates();
-            this.leaderboard.sort((a, b) => b.score - a.score);
-            this.leaderboard = this.leaderboard.slice(0, 10);
-            
-            // Zobrazíme upozornění uživateli
-            this.showOfflineWarning();
-        }
-    }
-
-    showOfflineWarning() {
-        // Přidáme upozornění do žebříčku
-        const leaderboardList = document.getElementById('leaderboard-list');
-        if (leaderboardList && this.leaderboard.length === 0) {
-            leaderboardList.innerHTML = `
-                <div style="text-align: center; color: #ff6b6b; padding: 20px; background: #ffe0e0; border-radius: 10px; margin: 10px 0;">
-                    <h3>⚠️ Offline režim</h3>
-                    <p>Nelze se připojit k online databázi.</p>
-                    <p>Žebříček není sdílený mezi zařízeními.</p>
-                    <p>Zkontrolujte internetové připojení.</p>
-                </div>
-            `;
-        }
-    }
-
-    clearLocalStorage() {
-        // Vymažeme staré lokální skóre, aby se používala pouze Firebase databáze
-        const oldLeaderboard = localStorage.getItem('flappyBirdLeaderboard');
-        if (oldLeaderboard) {
-            console.log('🗑️ Mažu staré lokální skóre pro čistý online start');
-            localStorage.removeItem('flappyBirdLeaderboard');
-        }
-    }
-
-    async saveScore() {
-        // Zobrazí vlastní dialog pro zadání jména
-        return new Promise((resolve) => {
-            this.showNameDialog((playerName) => {
-                const name = playerName || 'Anonym';
-                
-                // Uložení do Firebase
-                this.saveToFirebase(name).then((success) => {
-                    if (success) {
-                        console.log('Firebase úspěšné, načítám žebříček...');
-                        // Po úspěšném uložení do Firebase načteme aktuální žebříček
-                        this.loadLeaderboard().then(() => {
-                            resolve();
-                        });
-                    } else {
-                        console.log('Firebase selhal, ukládám lokálně');
-                        this.saveToLocalStorage(name);
-                        resolve();
-                    }
-                }).catch((error) => {
-                    console.log('Firebase selhal s chybou, ukládám lokálně:', error);
-                    this.saveToLocalStorage(name);
-                    resolve();
-                });
-            });
-        });
-    }
-
-    showNameDialog(callback) {
-        const nameDialog = document.getElementById('name-dialog');
-        const nameInput = document.getElementById('player-name-input');
-        const saveBtn = document.getElementById('save-name-btn');
-        const cancelBtn = document.getElementById('cancel-name-btn');
-        const scoreMessage = document.getElementById('score-message');
-
-        // Zobrazí dialog
-        this.showScreen('name-dialog');
-        
-        // Zobrazí vtipný text podle skóre
-        const message = this.getRandomMessage(this.score);
-        scoreMessage.textContent = message;
-        
-        nameInput.focus();
-        nameInput.value = '';
-
-        // Event listenery
-        const handleSave = () => {
-            const name = nameInput.value.trim();
-            this.showScreen('game-screen');
-            callback(name);
-        };
-
-        const handleCancel = () => {
-            this.showScreen('game-screen');
-            callback('Anonym');
-        };
-
-        const handleKeyPress = (e) => {
-            if (e.key === 'Enter') {
-                handleSave();
-            } else if (e.key === 'Escape') {
-                handleCancel();
-            }
-        };
-
-        // Přidá event listenery
-        saveBtn.addEventListener('click', handleSave, { once: true });
-        cancelBtn.addEventListener('click', handleCancel, { once: true });
-        nameInput.addEventListener('keydown', handleKeyPress, { once: true });
-    }
-
-    saveToLocalStorage(playerName) {
-        const newScore = {
-            name: playerName,
-            score: this.score,
-            date: new Date().toLocaleDateString('cs-CZ')
-        };
-        
-        // Načteme aktuální lokální žebříček
-        this.leaderboard = JSON.parse(localStorage.getItem('flappyBirdLeaderboard') || '[]');
-        
-        // Přidáme nové skóre
-        this.leaderboard.push(newScore);
-        
-        // Seřadíme a omezíme na top 10
-        this.leaderboard.sort((a, b) => b.score - a.score);
-        this.leaderboard = this.leaderboard.slice(0, 10);
-        
-        // Uložíme do localStorage
-        localStorage.setItem('flappyBirdLeaderboard', JSON.stringify(this.leaderboard));
-        console.log('Skóre uloženo do localStorage:', newScore);
-    }
-
-    async saveToFirebase(playerName) {
-        try {
-            if (window.db) {
-                console.log('🔥 Pokus o uložení skóre do Firebase:', { playerName, score: this.score });
-                console.log('🔥 Firebase db objekt:', window.db);
-                console.log('🔥 Firebase app:', firebase.app());
-                
-                const docRef = await window.db.collection('scores').add({
-                    playerName: playerName,
-                    score: this.score,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                console.log('✅ Skóre úspěšně uloženo do Firebase s ID:', docRef.id);
-                console.log('✅ Dokument vytvořen:', docRef.path);
-                
-                // Ověříme, že se data skutečně uložila
-                const doc = await docRef.get();
-                console.log('✅ Ověření uložení:', doc.data());
-                
-                return true;
-            } else {
-                console.error('❌ Firebase není dostupné (window.db je null)');
-                console.error('❌ Firebase objekt:', window.firebase);
-                return false;
-            }
-        } catch (error) {
-            console.error('❌ Chyba při ukládání do Firebase:', error);
-            console.error('❌ Detaily chyby:', error.message, error.code);
-            console.error('❌ Stack trace:', error.stack);
-            
-            // Zkusíme jednodušší uložení bez serverTimestamp
-            try {
-                console.log('🔄 Zkouším uložení bez serverTimestamp...');
-                const docRef = await window.db.collection('scores').add({
-                    playerName: playerName,
-                    score: this.score,
-                    timestamp: new Date()
-                });
-                console.log('✅ Alternativní uložení úspěšné:', docRef.id);
-                return true;
-            } catch (error2) {
-                console.error('❌ Ani alternativní uložení nefunguje:', error2);
-                return false;
-            }
-        }
-    }
-
-    async updateLeaderboard() {
-        // Načte aktuální žebříček z Firebase (vždy online)
-        await this.loadLeaderboard();
-        
-        const leaderboardList = document.getElementById('leaderboard-list');
-        leaderboardList.innerHTML = '';
-        
-        if (this.leaderboard.length === 0) {
-            leaderboardList.innerHTML = `
-                <div style="text-align: center; color: #666; padding: 20px;">
-                    <h3>🏆 Online žebříček</h3>
-                    <p>Zatím žádné skóre v online databázi</p>
-                    <p>Buďte první, kdo dosáhne skóre!</p>
-                </div>
-            `;
-            return;
-        }
-        
-        
-        this.leaderboard.forEach((entry, index) => {
-            const item = document.createElement('div');
-            item.className = 'leaderboard-item';
-            item.innerHTML = `
-                <span class="rank">#${index + 1}</span>
-                <span class="name">${entry.name}</span>
-                <span class="score">${entry.score}</span>
-            `;
-            leaderboardList.appendChild(item);
-        });
-    }
-    
     // Hudební funkce
     playBackgroundMusic() {
         if (this.backgroundMusic) {
@@ -913,71 +627,6 @@ class FlappyBirdGame {
         localStorage.setItem('selectedAvatar', avatarName);
     }
     
-    // Funkce pro získání náhodného vtipného textu podle skóre
-    getRandomMessage(score) {
-        const messages = {
-            'ultra-looser': [
-                "Ty seš úplný mimoň! Ptáček má větší IQ než ty! 🧠",
-                "Tohle je nový světový rekord v neúspěchu! Gratuluji! 🏆",
-                "Asi máš dneska špatný den... nebo celý život! 😅",
-                "Tohle je úroveň 'nevidím světlo ani na konci tunelu'! 🌙"
-            ],
-            'stale-looser': [
-                "Už to jde! Ale pořád jsi amatér! 😤",
-                "Tohle je úroveň 'mám talent, ale neumím ho využít'! ⭐",
-                "Už nejsi úplný mimoň, jenom částečný! 😅",
-                "Tohle je úroveň 'vidím světlo, ale neumím k němu doletět'! 💡"
-            ],
-            'stredni': [
-                "Hej, už to není tak špatný! Ale pořád jsi průměrný! 😐",
-                "Tohle je úroveň 'mám život pod kontrolou... někdy'! 🎮",
-                "Skoro jsi profík... skoro! 🎯",
-                "Tohle je úroveň 'mám talent, ale neumím ho využít naplno'! ⚡"
-            ],
-            'dobry': [
-                "Wow, ty umíš hrát! Respekt! 🎉",
-                "Tohle je úroveň 'mám život pod kontrolou'! 🎯",
-                "Skoro jsi mistr... skoro! 🏆",
-                "Tohle je úroveň 'mám talent a umím ho využít'! ⭐"
-            ],
-            'vyborny': [
-                "Ty jsi skoro legenda! Skoro! 🌟",
-                "Tohle je úroveň 'mám příliš mnoho volného času'! 😂",
-                "Už jsi lepší než průměrný Flappy Bird! 🐦🔥",
-                "Máš můj respekt, pane! 👏",
-                "Tohle je úroveň 'mám talent a umím ho využít naplno'! ⚡"
-            ],
-            'mistr': [
-                "Ty jsi absolutní mistr! Respekt! 🏆",
-                "Tohle je úroveň 'mám život pod kontrolou a umím ho využít'! 🎯",
-                "Už jsi lepší než většina legend! 🌟",
-                "Skoro jsi bůh... skoro! 👑",
-                "Tohle je úroveň 'mám talent, umím ho využít a umím ho využít naplno'! ⚡"
-            ],
-            'fucking-legend': [
-                "Fucking legend! Tleskám rukama nad hlavou! 👏👏🎉",
-                "Ty jsi absolutní bůh Flappy Bird! 👑",
-                "Tohle je úroveň 'mám příliš mnoho volného času a umím ho využít'! 😂",
-                "Už jsi lepší než samotný Flappy Bird! 🐦🔥",
-                "Máš můj absolutní respekt, pane! 👑👑"
-            ]
-        };
-
-        let category;
-        if (score >= 1 && score <= 10) category = 'ultra-looser';
-        else if (score >= 11 && score <= 25) category = 'stale-looser';
-        else if (score >= 26 && score <= 50) category = 'stredni';
-        else if (score >= 51 && score <= 100) category = 'dobry';
-        else if (score >= 101 && score <= 200) category = 'vyborny';
-        else if (score >= 201 && score <= 299) category = 'mistr';
-        else if (score >= 300) category = 'fucking-legend';
-        else category = 'ultra-looser'; // Fallback pro skóre 0
-
-        const categoryMessages = messages[category];
-        const randomIndex = Math.floor(Math.random() * categoryMessages.length);
-        return categoryMessages[randomIndex];
-    }
-
 }
 
 // Initialize game when page loads

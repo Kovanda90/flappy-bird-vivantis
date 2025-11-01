@@ -12,7 +12,6 @@
             <h1>VivaBird</h1>
             <button id="start-btn" class="btn">Začít hru</button>
             <button id="avatar-btn" class="btn">Vyber si avatar</button>
-            <button id="leaderboard-btn" class="btn">Žebříček</button>
             <button id="about-btn" class="btn">O hře</button>
         </div>
 
@@ -28,12 +27,6 @@
                 <button id="restart-btn" class="btn">Hrát znovu</button>
                 <button id="menu-btn" class="btn">Hlavní menu</button>
             </div>
-        </div>
-
-        <div id="leaderboard-screen" class="screen">
-            <h2>Žebříček</h2>
-            <div id="leaderboard-list"></div>
-            <button id="back-btn" class="btn">Zpět</button>
         </div>
 
         <div id="about-screen" class="screen">
@@ -76,18 +69,6 @@
             <button id="avatar-back-btn" class="btn">Vybrat</button>
         </div>
 
-        <!-- Dialog pro zadání jména -->
-        <div id="name-dialog" class="screen">
-            <div class="dialog-content">
-                <h2>Zadejte své jméno</h2>
-                <p id="score-message" class="score-message"></p>
-                <input type="text" id="player-name-input" placeholder="Vaše jméno" maxlength="20">
-                <div class="dialog-buttons">
-                    <button id="save-name-btn" class="btn">Uložit</button>
-                    <button id="cancel-name-btn" class="btn btn-secondary">Zrušit</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <audio id="background-music" loop>
@@ -100,13 +81,6 @@
     <audio id="pop-sound">
         <source src="zvuky/pop.mp3" type="audio/mpeg">
     </audio>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <!-- Firebase konfigurace -->
-    <script src="firebase-config.js"></script>
     
     <script src="game.js"></script>
 </body>
