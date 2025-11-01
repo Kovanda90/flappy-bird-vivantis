@@ -4,6 +4,7 @@ class FlappyBirdGame {
         this.ctx = this.canvas.getContext('2d');
         this.score = 0;
         this.gameRunning = false;
+        this.waitingForFirstClick = false; // Čekáme na první klik před startem hry
         this.bird = {
             x: 50,
             y: 200,
@@ -123,8 +124,9 @@ class FlappyBirdGame {
     startGame() {
         this.showScreen('game-screen');
         this.resetGame();
-        this.gameRunning = true;
-        this.gameLoop();
+        this.waitingForFirstClick = true; // Čekáme na první klik
+        this.gameRunning = false; // Hra ještě neběží
+        this.gameLoop(); // Spustíme loop, ale hra čeká na klik
         
         // Spustí hudbu
         this.playBackgroundMusic();
@@ -151,7 +153,8 @@ class FlappyBirdGame {
 
     restartGame() {
         this.resetGame();
-        this.gameRunning = true;
+        this.waitingForFirstClick = true; // Čekáme na první klik
+        this.gameRunning = false; // Hra ještě neběží
         this.gameLoop();
         
         // Hudba pokračuje i při restartu - necháme ji hrát
@@ -160,6 +163,15 @@ class FlappyBirdGame {
 
 
     jump() {
+        // Pokud čekáme na první klik, začni hru
+        if (this.waitingForFirstClick) {
+            this.waitingForFirstClick = false;
+            this.gameRunning = true;
+            this.bird.velocity = this.bird.jumpPower; // První skok
+            return;
+        }
+        
+        // Normální skok během hry
         if (this.gameRunning) {
             this.bird.velocity = this.bird.jumpPower;
         }
@@ -398,6 +410,17 @@ class FlappyBirdGame {
         // Draw bird
         this.drawBird();
         
+        // Pokud čekáme na první klik, zobraz nápovědu
+        if (this.waitingForFirstClick) {
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = 'bold 24px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('Klikni pro start', this.canvas.width / 2, this.canvas.height / 2);
+        }
 
     }
 
@@ -535,10 +558,15 @@ class FlappyBirdGame {
 
 
     async gameLoop() {
-        if (!this.gameRunning) return;
+        // Pokud hra neběží a nečekáme na první klik, zastav loop
+        if (!this.gameRunning && !this.waitingForFirstClick) return;
         
-        await this.updateBird();
-        await this.updatePipes();
+        // Pokud hra běží, aktualizuj pozice
+        if (this.gameRunning) {
+            await this.updateBird();
+            await this.updatePipes();
+        }
+        // Pokud čekáme na první klik, jen kreslíme statický obraz
 
         this.draw();
         
