@@ -394,6 +394,74 @@ body {
         font-size: 1.2rem !important; /* Původní velikost písma */
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6) !important; /* Silnější stín pro čitelnost */
     }
+    
+    /* Úpravy pro game-over okno na mobilu */
+    #game-over {
+        padding: 20px 15px !important;
+        max-width: 90% !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+    }
+    
+    #game-over h2 {
+        font-size: 1.5rem !important;
+        margin-bottom: 10px !important;
+    }
+    
+    #game-over p {
+        font-size: 0.95rem !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .game-over-message {
+        font-size: 0.9rem !important;
+        padding: 12px 15px !important;
+        margin: 10px 0 !important;
+    }
+    
+    #save-score-section {
+        margin-top: 15px !important;
+    }
+    
+    #save-score-section p {
+        font-size: 0.9rem !important;
+        margin: 8px 0 !important;
+    }
+    
+    #player-name {
+        max-width: 100% !important;
+        padding: 10px !important;
+        font-size: 0.9rem !important;
+        margin: 15px 0 !important;
+    }
+    
+    .game-over-buttons {
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+    }
+    
+    .game-over-buttons .btn {
+        width: 100% !important;
+        min-width: auto !important;
+    }
+    
+    #game-over-actions {
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-top: 15px !important;
+    }
+    
+    #game-over-actions .btn {
+        width: 100% !important;
+        min-width: auto !important;
+    }
+    
+    .save-success-message {
+        padding: 12px 20px !important;
+        font-size: 1rem !important;
+        margin-top: 15px !important;
+    }
 }
 
 /* Speciální pravidla pro velmi malé obrazovky - VERZE 3 */
@@ -404,6 +472,35 @@ body {
     
     #game-info span {
         font-size: 1.2rem !important; /* Původní velikost písma */
+    }
+    
+    /* Další úpravy pro game-over na velmi malých obrazovkách */
+    #game-over {
+        padding: 15px 10px !important;
+        max-width: 95% !important;
+    }
+    
+    #game-over h2 {
+        font-size: 1.3rem !important;
+    }
+    
+    #game-over p {
+        font-size: 0.85rem !important;
+    }
+    
+    .game-over-message {
+        font-size: 0.85rem !important;
+        padding: 10px 12px !important;
+    }
+    
+    #player-name {
+        padding: 8px !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .save-success-message {
+        padding: 10px 15px !important;
+        font-size: 0.9rem !important;
     }
     
     /* Oprava žebříčku na malých telefonech */
