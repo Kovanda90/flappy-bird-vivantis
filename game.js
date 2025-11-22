@@ -35,8 +35,8 @@ class FlappyBirdGame {
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
 
-
-        
+        // Sněžení - padající vločky
+        this.snowflakes = [];
 
         
         this.birdImage = new Image();
@@ -82,6 +82,9 @@ class FlappyBirdGame {
         this.canvas.width = this.canvas.offsetWidth;
         this.canvas.height = this.canvas.offsetHeight;
         console.log(`Canvas nastaven: ${this.canvas.width}x${this.canvas.height}`);
+        
+        // Inicializuj vločky po nastavení canvasu
+        this.initSnowflakes();
     }
 
     setupEventListeners() {
@@ -471,12 +474,56 @@ class FlappyBirdGame {
         return categoryMessages[randomIndex];
     }
 
+    initSnowflakes() {
+        // Vytvoří 50 jemných vloček
+        this.snowflakes = [];
+        for (let i = 0; i < 50; i++) {
+            this.snowflakes.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                size: Math.random() * 3 + 1, // Velikost 1-4px
+                speed: Math.random() * 1 + 0.5, // Rychlost 0.5-1.5
+                opacity: Math.random() * 0.5 + 0.3 // Průhlednost 0.3-0.8
+            });
+        }
+    }
+
+    updateSnowflakes() {
+        // Aktualizuje pozice vloček
+        for (let i = 0; i < this.snowflakes.length; i++) {
+            const flake = this.snowflakes[i];
+            flake.y += flake.speed;
+            
+            // Pokud vločka spadne dolů, přesune se nahoru
+            if (flake.y > this.canvas.height) {
+                flake.y = -5;
+                flake.x = Math.random() * this.canvas.width;
+            }
+        }
+    }
+
+    drawSnowflakes() {
+        // Kreslí jemné vločky
+        this.ctx.save();
+        for (let i = 0; i < this.snowflakes.length; i++) {
+            const flake = this.snowflakes[i];
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
+            this.ctx.beginPath();
+            this.ctx.arc(flake.x, flake.y, flake.size, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+        this.ctx.restore();
+    }
+
     draw() {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
         // Draw background
         this.drawBackground();
+        
+        // Draw snowflakes (před trubkami, aby byly v pozadí)
+        this.drawSnowflakes();
         
         // Draw pipes
         this.drawPipes();
@@ -639,6 +686,9 @@ class FlappyBirdGame {
     async gameLoop() {
         // Pokud hra neběží a nečekáme na první klik, zastav loop
         if (!this.gameRunning && !this.waitingForFirstClick) return;
+        
+        // Aktualizuj vločky (vždy, i když čekáme na klik)
+        this.updateSnowflakes();
         
         // Pokud hra běží, aktualizuj pozice
         if (this.gameRunning) {
