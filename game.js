@@ -502,13 +502,13 @@ class FlappyBirdGame {
         };
 
         let category;
-        if (score >= 0 && score <= 10) category = 'ultra-loser';
-        else if (score >= 11 && score <= 25) category = 'trosku-loser';
-        else if (score >= 26 && score <= 50) category = 'slusny';
-        else if (score >= 51 && score <= 100) category = 'dobry';
-        else if (score >= 101 && score <= 200) category = 'vyborny';
-        else if (score >= 201 && score <= 299) category = 'mistr';
-        else if (score >= 300) category = 'absolut-legend';
+        if (score >= 0 && score <= 40) category = 'ultra-loser';
+        else if (score >= 41 && score <= 80) category = 'trosku-loser';
+        else if (score >= 81 && score <= 130) category = 'slusny';
+        else if (score >= 131 && score <= 250) category = 'dobry';
+        else if (score >= 251 && score <= 400) category = 'vyborny';
+        else if (score >= 401 && score <= 750) category = 'mistr';
+        else if (score >= 751) category = 'absolut-legend';
         else category = 'ultra-loser'; // Fallback pro skóre 0
 
         const categoryMessages = messages[category];
