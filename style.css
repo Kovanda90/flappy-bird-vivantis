@@ -549,6 +549,41 @@ body {
     margin: 0;
 }
 
+.save-success-message {
+    margin-top: 20px;
+    padding: 15px 25px;
+    background: #4CAF50;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: center;
+    animation: fadeInOut 1.5s ease-in-out;
+}
+
+.save-success-message.hidden {
+    display: none;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
 #name-dialog .btn {
     margin: 5px;
 }

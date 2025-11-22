@@ -885,11 +885,18 @@ class FlappyBirdGame {
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             
-            alert('Skóre úspěšně uloženo!');
+            // Zobraz hlášku o úspěšném uložení
+            const successMessage = document.getElementById('save-success-message');
+            successMessage.classList.remove('hidden');
             
-            // Skryj sekci pro uložení a zobraz tlačítka
+            // Skryj sekci pro uložení
             document.getElementById('save-score-section').classList.add('hidden');
-            document.getElementById('game-over-actions').classList.remove('hidden');
+            
+            // Po 1.5 sekundách skryj hlášku a zobraz tlačítka
+            setTimeout(() => {
+                successMessage.classList.add('hidden');
+                document.getElementById('game-over-actions').classList.remove('hidden');
+            }, 1500);
             
             this.loadLeaderboard(); // Aktualizuj žebříček (na pozadí)
         } catch (error) {
