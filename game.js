@@ -99,7 +99,18 @@ class FlappyBirdGame {
         document.getElementById('about-back-btn').addEventListener('click', () => this.showScreen('menu'));
         document.getElementById('avatar-back-btn').addEventListener('click', () => this.showScreen('menu'));
         
-        // Poznámka: back-btn pro leaderboard byl odstraněn, protože žebříček už neexistuje
+        // Leaderboard
+        document.getElementById('leaderboard-btn').addEventListener('click', () => {
+            this.loadLeaderboard();
+            this.showScreen('leaderboard-screen');
+        });
+        document.getElementById('leaderboard-back-btn').addEventListener('click', () => this.showScreen('menu'));
+        
+        // Name dialog
+        document.getElementById('save-score-btn').addEventListener('click', () => this.saveScore());
+        document.getElementById('skip-score-btn').addEventListener('click', () => {
+            this.showScreen('menu');
+        });
         
         // Touch and keyboard controls
         this.canvas.addEventListener('click', () => this.jump());
@@ -420,6 +431,16 @@ class FlappyBirdGame {
         document.getElementById('game-over-message').textContent = message;
         
         document.getElementById('game-over').classList.remove('hidden');
+        
+        // Zobraz dialog pro uložení skóre (pokud je skóre > 0)
+        if (this.score > 0) {
+            // Počkej chvíli, pak zobraz dialog
+            setTimeout(() => {
+                document.getElementById('dialog-score').textContent = this.score;
+                document.getElementById('player-name').value = '';
+                this.showScreen('name-dialog');
+            }, 2000);
+        }
         
         // Hudba pokračuje i po konci hry - necháme ji hrát
     }
@@ -809,6 +830,131 @@ class FlappyBirdGame {
         
         // Uloží výběr do localStorage
         localStorage.setItem('selectedAvatar', avatarName);
+    }
+
+    // ========== LEADERBOARD FUNCTIONS WITH ANTI-HACK PROTECTION ==========
+    
+    // Validace skóre - maximální rozumná hodnota
+    isValidScore(score) {
+        // Maximální skóre: 10000 (lze upravit)
+        return typeof score === 'number' && score >= 0 && score <= 10000 && Number.isInteger(score);
+    }
+    
+    // Validace jména
+    isValidName(name) {
+        if (!name || typeof name !== 'string') return false;
+        // Délka 1-20 znaků, povolené znaky: písmena, čísla, mezery, pomlčky, podtržítka
+        const nameRegex = /^[a-zA-Z0-9\s\-_áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]{1,20}$/;
+        return nameRegex.test(name.trim());
+    }
+    
+    // Uložení skóre do Firebase s validací
+    async saveScore() {
+        const nameInput = document.getElementById('player-name');
+        const playerName = nameInput.value.trim();
+        
+        // Validace jména
+        if (!this.isValidName(playerName)) {
+            alert('Neplatné jméno! Použijte 1-20 znaků (písmena, čísla, mezery, pomlčky, podtržítka).');
+            return;
+        }
+        
+        // Validace skóre
+        if (!this.isValidScore(this.score)) {
+            alert('Neplatné skóre! Maximální skóre je 10000.');
+            return;
+        }
+        
+        // Kontrola, zda je Firebase dostupný
+        if (!window.db) {
+            alert('Žebříček není momentálně dostupný. Zkuste to později.');
+            return;
+        }
+        
+        try {
+            // Uložení do Firebase
+            await window.db.collection('scores').add({
+                playerName: playerName,
+                score: this.score,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            alert('Skóre úspěšně uloženo!');
+            this.showScreen('menu');
+            this.loadLeaderboard(); // Aktualizuj žebříček
+        } catch (error) {
+            console.error('Chyba při ukládání skóre:', error);
+            alert('Chyba při ukládání skóre. Zkuste to znovu.');
+        }
+    }
+    
+    // Načtení žebříčku z Firebase
+    async loadLeaderboard() {
+        const leaderboardList = document.getElementById('leaderboard-list');
+        leaderboardList.innerHTML = '<p>Načítání...</p>';
+        
+        // Kontrola, zda je Firebase dostupný
+        if (!window.db) {
+            leaderboardList.innerHTML = '<p>Žebříček není momentálně dostupný.</p>';
+            return;
+        }
+        
+        try {
+            // Načtení top 50 výsledků, seřazených podle skóre (sestupně)
+            const snapshot = await window.db.collection('scores')
+                .orderBy('score', 'desc')
+                .limit(50)
+                .get();
+            
+            if (snapshot.empty) {
+                leaderboardList.innerHTML = '<p>Žádné výsledky zatím.</p>';
+                return;
+            }
+            
+            // Filtrování neplatných výsledků (ochrana proti hackování)
+            const validScores = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                // Podpora pro staré záznamy s 'name' i nové s 'playerName'
+                const playerName = data.playerName || data.name;
+                if (this.isValidScore(data.score) && this.isValidName(playerName)) {
+                    validScores.push({
+                        name: playerName,
+                        score: data.score,
+                        timestamp: data.timestamp
+                    });
+                }
+            });
+            
+            // Zobrazení výsledků
+            if (validScores.length === 0) {
+                leaderboardList.innerHTML = '<p>Žádné platné výsledky.</p>';
+                return;
+            }
+            
+            let html = '<div class="leaderboard-entry header"><span>#</span><span>Jméno</span><span>Skóre</span></div>';
+            validScores.forEach((entry, index) => {
+                html += `
+                    <div class="leaderboard-entry">
+                        <span class="rank">#${index + 1}</span>
+                        <span class="name">${this.escapeHtml(entry.name)}</span>
+                        <span class="score">${entry.score}</span>
+                    </div>
+                `;
+            });
+            
+            leaderboardList.innerHTML = html;
+        } catch (error) {
+            console.error('Chyba při načítání žebříčku:', error);
+            leaderboardList.innerHTML = '<p>Chyba při načítání žebříčku.</p>';
+        }
+    }
+    
+    // Escape HTML pro bezpečnost
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
     
 }

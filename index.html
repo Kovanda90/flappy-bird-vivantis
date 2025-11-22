@@ -16,6 +16,10 @@
 </script>
     
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div id="game-container">
@@ -23,6 +27,7 @@
             <h1>VivaBird</h1>
             <button id="start-btn" class="btn">Začít hru</button>
             <button id="avatar-btn" class="btn">Vyber si avatar</button>
+            <button id="leaderboard-btn" class="btn">Žebříček</button>
             <button id="about-btn" class="btn">O hře</button>
         </div>
 
@@ -85,6 +90,21 @@
             <button id="avatar-back-btn" class="btn">Vybrat</button>
         </div>
 
+        <div id="leaderboard-screen" class="screen">
+            <h2>Žebříček</h2>
+            <div id="leaderboard-list"></div>
+            <button id="leaderboard-back-btn" class="btn">Zpět</button>
+        </div>
+
+        <div id="name-dialog" class="screen">
+            <h2>Gratulujeme!</h2>
+            <p>Vaše skóre: <span id="dialog-score">0</span></p>
+            <p>Zadejte své jméno pro žebříček:</p>
+            <input type="text" id="player-name" placeholder="Vaše jméno" maxlength="20">
+            <button id="save-score-btn" class="btn">Uložit</button>
+            <button id="skip-score-btn" class="btn">Přeskočit</button>
+        </div>
+
     </div>
 
     <audio id="background-music" loop>
@@ -97,6 +117,22 @@
     <audio id="pop-sound">
         <source src="zvuky/pop.mp3" type="audio/mpeg">
     </audio>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0DG5wwG9bFz1kObQY1hjAYuROAFccAq8",
+            authDomain: "flappy-bird---viva.firebaseapp.com",
+            projectId: "flappy-bird---viva",
+            storageBucket: "flappy-bird---viva.firebasestorage.app",
+            messagingSenderId: "143121183377",
+            appId: "1:143121183377:web:ba6cf81e210294f20a8530"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore();
+    </script>
     
     <script src="game.js"></script>
 </body>
