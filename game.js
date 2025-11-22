@@ -223,9 +223,9 @@ class FlappyBirdGame {
                 collisionHandled: false
             });
             
-            // Přidání vánočního dárku po prvním průletu a pak každých 8 průletů (aby se nekřížilo s ostatními)
-            // Dárek: 1, 9, 17, 25, 33...
-            if (this.pipeCount === 1 || (this.pipeCount % 8 === 1 && this.pipeCount > 1)) {
+            // Přidání vánočního dárku k první trubce (pipeCount === 0) a pak každých 8 průletů (aby se nekřížilo s ostatními)
+            // Dárek: 0 (první trubka), 8, 16, 24, 32...
+            if (this.pipeCount === 0 || (this.pipeCount % 8 === 0 && this.pipeCount > 0)) {
                 this.bonuses.push({
                     x: this.canvas.width + 100,
                     y: gapY + this.gapHeight / 2 - 25,
@@ -235,8 +235,8 @@ class FlappyBirdGame {
             }
             
             // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick) - ale ne když je flash nebo dárek
-            // Ostatní bonusy: 5, 15, 25, 35... (ale 25 je dárek, takže se přeskočí)
-            if (this.pipeCount % 5 === 0 && this.pipeCount > 0 && this.pipeCount % 10 !== 0 && !(this.pipeCount % 8 === 1) && this.pipeCount !== 1) {
+            // Ostatní bonusy: 5, 15, 35, 45... (přeskočí se, když je dárek)
+            if (this.pipeCount % 5 === 0 && this.pipeCount > 0 && this.pipeCount % 10 !== 0 && !(this.pipeCount % 8 === 0) && this.pipeCount !== 0) {
                 const bonusType = Math.floor(Math.random() * 3); // 0-2 pro ring, ceresne, lipstick
                 this.bonuses.push({
                     x: this.canvas.width + 100,
@@ -248,7 +248,7 @@ class FlappyBirdGame {
             
             // Přidání flash bonusu každých 10 průletů (samostatně) - ale ne když je dárek
             // Flash: 10, 20, 30, 40...
-            if (this.pipeCount % 10 === 0 && this.pipeCount > 0 && !(this.pipeCount % 8 === 1)) {
+            if (this.pipeCount % 10 === 0 && this.pipeCount > 0 && !(this.pipeCount % 8 === 0)) {
                 this.bonuses.push({
                     x: this.canvas.width + 100,
                     y: gapY + this.gapHeight / 2 - 25,
