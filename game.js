@@ -31,7 +31,7 @@ class FlappyBirdGame {
         // Bonusové předměty
         this.bonuses = [];
         this.bonusImages = [];
-        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png'];
+        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png', 'gift.svg'];
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
 
@@ -223,8 +223,18 @@ class FlappyBirdGame {
                 collisionHandled: false
             });
             
-            // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick) - ale ne když je flash
-            if (this.pipeCount % 5 === 0 && this.pipeCount > 0 && this.pipeCount % 10 !== 0) {
+            // Přidání vánočního dárku po prvním průletu a pak každých 7 průletů
+            if (this.pipeCount === 1 || (this.pipeCount % 7 === 0 && this.pipeCount > 1)) {
+                this.bonuses.push({
+                    x: this.canvas.width + 100,
+                    y: gapY + this.gapHeight / 2 - 25,
+                    type: 4, // vánoční dárek
+                    collected: false
+                });
+            }
+            
+            // Přidání bonusu každých 5 průletů (ring, ceresne, lipstick) - ale ne když je flash nebo dárek
+            if (this.pipeCount % 5 === 0 && this.pipeCount > 0 && this.pipeCount % 10 !== 0 && this.pipeCount % 7 !== 0 && this.pipeCount !== 1) {
                 const bonusType = Math.floor(Math.random() * 3); // 0-2 pro ring, ceresne, lipstick
                 this.bonuses.push({
                     x: this.canvas.width + 100,
@@ -234,8 +244,8 @@ class FlappyBirdGame {
                 });
             }
             
-            // Přidání flash bonusu každých 10 průletů (samostatně)
-            if (this.pipeCount % 10 === 0 && this.pipeCount > 0) {
+            // Přidání flash bonusu každých 10 průletů (samostatně) - ale ne když je dárek
+            if (this.pipeCount % 10 === 0 && this.pipeCount > 0 && this.pipeCount % 7 !== 0) {
                 this.bonuses.push({
                     x: this.canvas.width + 100,
                     y: gapY + this.gapHeight / 2 - 25,
@@ -306,6 +316,8 @@ class FlappyBirdGame {
                 
                 if (bonus.type === 3) { // flash
                     this.extraLives++;
+                } else if (bonus.type === 4) { // vánoční dárek
+                    this.score += 10; // Přidá 10 bodů za vánoční dárek
                 } else { // ring, ceresne, lipstick
                     this.score += 5; // Přidá 5 bodů přímo k hlavnímu skóre
                 }
@@ -667,15 +679,29 @@ class FlappyBirdGame {
                 const y = bonus.y + (size - newHeight) / 2;
                 this.ctx.drawImage(img, bonus.x, y, newWidth, newHeight);
             } else {
-                // Fallback - nakreslíme barevný kruh
+                // Fallback - nakreslíme barevný tvar
                 if (bonus.type === 3) { // flash
                     this.ctx.fillStyle = '#FFD700';
+                    this.ctx.beginPath();
+                    this.ctx.arc(bonus.x + 25, bonus.y + 25, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
+                } else if (bonus.type === 4) { // vánoční dárek
+                    this.ctx.fillStyle = '#E80000';
+                    this.ctx.fillRect(bonus.x, bonus.y, 50, 50);
+                    this.ctx.strokeStyle = '#FFFFFF';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(bonus.x + 25, bonus.y);
+                    this.ctx.lineTo(bonus.x + 25, bonus.y + 50);
+                    this.ctx.moveTo(bonus.x, bonus.y + 25);
+                    this.ctx.lineTo(bonus.x + 50, bonus.y + 25);
+                    this.ctx.stroke();
                 } else {
                     this.ctx.fillStyle = '#FF69B4';
+                    this.ctx.beginPath();
+                    this.ctx.arc(bonus.x + 25, bonus.y + 25, 25, 0, Math.PI * 2);
+                    this.ctx.fill();
                 }
-                this.ctx.beginPath();
-                this.ctx.arc(bonus.x + 25, bonus.y + 25, 25, 0, Math.PI * 2);
-                this.ctx.fill();
             }
         });
     }
