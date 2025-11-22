@@ -40,7 +40,7 @@ class FlappyBirdGame {
 
         
         this.birdImage = new Image();
-        this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'unicorn.png'; // Načte uložený avatar nebo výchozí
+        this.selectedAvatar = localStorage.getItem('selectedAvatar') || 'plamenak_winter.png'; // Načte uložený avatar nebo výchozí
         this.birdImage.src = `ptacek/${this.selectedAvatar}`;
         this.birdImage.onload = () => {
             console.log('Obrázek ptáčka načten');
