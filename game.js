@@ -31,7 +31,7 @@ class FlappyBirdGame {
         // Bonusové předměty
         this.bonuses = [];
         this.bonusImages = [];
-        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png', 'gift.svg'];
+        this.bonusImageNames = ['ring 1.png', 'ceresne 1.png', 'lipstick 1.png', 'flash 1.png', 'gift.png'];
         this.extraLives = 0;
         this.pipeCount = 0; // Počítadlo průletů mezi tubusy
 
