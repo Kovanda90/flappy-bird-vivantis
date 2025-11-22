@@ -106,10 +106,12 @@ class FlappyBirdGame {
         });
         document.getElementById('leaderboard-back-btn').addEventListener('click', () => this.showScreen('menu'));
         
-        // Name dialog
+        // Save score buttons (v game-over okně)
         document.getElementById('save-score-btn').addEventListener('click', () => this.saveScore());
         document.getElementById('skip-score-btn').addEventListener('click', () => {
-            this.showScreen('menu');
+            // Skryj sekci pro uložení a zobraz tlačítka
+            document.getElementById('save-score-section').classList.add('hidden');
+            document.getElementById('game-over-actions').classList.remove('hidden');
         });
         
         // Touch and keyboard controls
@@ -430,17 +432,21 @@ class FlappyBirdGame {
         const message = this.getGameOverMessage(this.score);
         document.getElementById('game-over-message').textContent = message;
         
-        document.getElementById('game-over').classList.remove('hidden');
+        // Resetuj pole pro jméno
+        document.getElementById('player-name').value = '';
         
-        // Zobraz dialog pro uložení skóre (pokud je skóre > 0)
+        // Zobraz/skryj sekce podle toho, jestli je skóre > 0
         if (this.score > 0) {
-            // Počkej chvíli, pak zobraz dialog
-            setTimeout(() => {
-                document.getElementById('dialog-score').textContent = this.score;
-                document.getElementById('player-name').value = '';
-                this.showScreen('name-dialog');
-            }, 2000);
+            // Zobraz sekci pro uložení skóre
+            document.getElementById('save-score-section').classList.remove('hidden');
+            document.getElementById('game-over-actions').classList.add('hidden');
+        } else {
+            // Skryj sekci pro uložení a zobraz tlačítka
+            document.getElementById('save-score-section').classList.add('hidden');
+            document.getElementById('game-over-actions').classList.remove('hidden');
         }
+        
+        document.getElementById('game-over').classList.remove('hidden');
         
         // Hudba pokračuje i po konci hry - necháme ji hrát
     }
@@ -880,8 +886,12 @@ class FlappyBirdGame {
             });
             
             alert('Skóre úspěšně uloženo!');
-            this.showScreen('menu');
-            this.loadLeaderboard(); // Aktualizuj žebříček
+            
+            // Skryj sekci pro uložení a zobraz tlačítka
+            document.getElementById('save-score-section').classList.add('hidden');
+            document.getElementById('game-over-actions').classList.remove('hidden');
+            
+            this.loadLeaderboard(); // Aktualizuj žebříček (na pozadí)
         } catch (error) {
             console.error('Chyba při ukládání skóre:', error);
             alert('Chyba při ukládání skóre. Zkuste to znovu.');

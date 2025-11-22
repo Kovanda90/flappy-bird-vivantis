@@ -517,6 +517,38 @@ body {
     border-color: #764ba2;
 }
 
+#save-score-section {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#save-score-section p {
+    margin: 10px 0;
+    color: #666;
+}
+
+.game-over-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.game-over-buttons .btn {
+    margin: 0;
+}
+
+#game-over-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+#game-over-actions .btn {
+    margin: 0;
+}
+
 #name-dialog .btn {
     margin: 5px;
 }

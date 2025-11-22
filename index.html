@@ -41,8 +41,18 @@
                 <h2>Konec hry!</h2>
                 <p>Skóre: <span id="final-score">0</span></p>
                 <p id="game-over-message" class="game-over-message"></p>
-                <button id="restart-btn" class="btn">Hrát znovu</button>
-                <button id="menu-btn" class="btn">Hlavní menu</button>
+                <div id="save-score-section">
+                    <p>Zadejte své jméno pro žebříček:</p>
+                    <input type="text" id="player-name" placeholder="Vaše jméno" maxlength="20">
+                    <div class="game-over-buttons">
+                        <button id="save-score-btn" class="btn">Uložit</button>
+                        <button id="skip-score-btn" class="btn">Přeskočit</button>
+                    </div>
+                </div>
+                <div id="game-over-actions" class="hidden">
+                    <button id="restart-btn" class="btn">Hrát znovu</button>
+                    <button id="menu-btn" class="btn">Hlavní menu</button>
+                </div>
             </div>
         </div>
 
